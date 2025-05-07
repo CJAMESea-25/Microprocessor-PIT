@@ -1,0 +1,139 @@
+/* Reset */
+* {
+    margin-top: 10px;
+    margin-left: 8px;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+  }
+  
+  /* Body */
+  body {
+    background-color: #ffffff;
+    color: #333;
+    padding: 10px;
+  }
+  
+  /* Header */
+  header .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 32px;
+    font-weight: bold;
+  }
+  
+  header .logo img {
+    width: 50px; 
+    height: auto;
+  }
+  
+  /* Landing Page Layout */
+  .landing {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+  }
+  
+  /* Text Section */
+  .text-content {
+    margin-left: 50px;
+    max-width: 55%;
+    padding-right: 50px; 
+  }
+  
+  .text-content h1 {
+    margin-bottom: 1000px;
+  }
+  
+  .text-content p {
+    margin-top: 50px;
+    font-size: 25px;
+    margin-bottom: 30px;
+    line-height: 1.5;
+  }
+  
+  .buttons .btn {
+    padding: 25px 50px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: bold;
+    margin-right: 50px;
+    display: inline-block;
+  }
+  
+  .btn.dark {
+    background-color: #3a4a52;
+    color: white;
+  }
+  
+  .btn.blue {
+    background-color: #0070ff;
+    color: white;
+  }
+  
+  /* Illustration */
+  .illustration {
+    padding-left: 30px; 
+  }
+  
+  .illustration img {
+    width: 1000px;
+    max-width: 100%;
+  }
+  
+/* Login Page Layout */
+.login-page {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+  }
+  
+  /* Login Form */
+  .login-form {
+    max-width: 45%;
+    padding: 20px 50px;
+  }
+  
+  .login-form h1 {
+    font-size: 70px;
+    color: #0070ff;
+    margin-bottom: 80px;
+    border-bottom: 5px solid #0070ff;
+    display: inline-block;
+    padding-bottom: 5px;
+  }
+  
+  .login-form p {
+    font-size: 22px;
+    margin: 20px 0 30px;
+    line-height: 1.5;
+    margin-bottom: 50px;
+  }
+  
+  .login-form input[type="text"],
+  .login-form input[type="password"] {
+    width: 90%;
+    color: #CCE0FF;
+    padding: 25px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    border: none;
+    background-color: #d7e3ff;
+    font-size: 18px;
+  }
+  
+  .login-buttons {
+    display: flex;
+    gap: 20px;
+  }
+
+  .admin-illustration img {
+  width: 750px;
+  max-width: 100%;
+  height: auto;
+  }  
+
+  
