@@ -1,0 +1,17 @@
+/* App.css */
+
+/* Reset */
+* {
+  margin-top: 10px;
+  margin-left: 8px;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Arial', sans-serif;
+}
+
+/* Body */
+body {
+  background-color: #ffffff;
+  color: #333;
+  padding: 10px;
+}

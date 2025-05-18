@@ -1,0 +1,71 @@
+/* LandingPage.css */
+
+/* Header */
+header .logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 32px;
+  font-weight: bold;
+}
+
+header .logo img {
+  width: 50px;
+  height: auto;
+}
+
+/* Layout */
+.landing {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+}
+
+/* Text */
+.text-content {
+  margin-left: 50px;
+  max-width: 55%;
+  padding-right: 50px;
+}
+
+.text-content h1 {
+  margin-bottom: 1000px;
+}
+
+.text-content p {
+  margin-top: 50px;
+  font-size: 25px;
+  margin-bottom: 30px;
+  line-height: 1.5;
+}
+
+/* Buttons */
+.buttons .btn {
+  padding: 25px 50px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: bold;
+  margin-right: 50px;
+  display: inline-block;
+}
+
+.btn.dark {
+  background-color: #3a4a52;
+  color: white;
+}
+
+.btn.blue {
+  background-color: #0070ff;
+  color: white;
+}
+
+/* Illustration */
+.illustration {
+  padding-left: 30px;
+}
+
+.illustration img {
+  width: 1000px;
+  max-width: 100%;
+}

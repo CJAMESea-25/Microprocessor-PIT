@@ -1,0 +1,52 @@
+/* Login.css */
+
+.login-page {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+}
+
+.login-form {
+  max-width: 45%;
+  padding: 20px 50px;
+}
+
+.login-form h1 {
+  font-size: 70px;
+  color: #0070ff;
+  margin-bottom: 80px;
+  border-bottom: 5px solid #0070ff;
+  display: inline-block;
+  padding-bottom: 5px;
+}
+
+.login-form p {
+  font-size: 22px;
+  margin: 20px 0 30px;
+  line-height: 1.5;
+  margin-bottom: 50px;
+}
+
+.login-form input[type="text"],
+.login-form input[type="password"] {
+  width: 90%;
+  color: #CCE0FF;
+  padding: 25px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  border: none;
+  background-color: #d7e3ff;
+  font-size: 18px;
+}
+
+.login-buttons {
+  display: flex;
+  gap: 20px;
+}
+
+.admin-illustration img {
+  width: 750px;
+  max-width: 100%;
+  height: auto;
+}
