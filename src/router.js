@@ -9,8 +9,8 @@ export default function AppRouter() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LogIn />} />
-        {/* Add other routes later when components are ready */}
-        {/* <Route path="/dashboard" element={<DashboardPage />} /> */}
+        <Route path="/manage-posts" element={<ManagePosts />} />
+
       </Routes>
     </Router>
   );
