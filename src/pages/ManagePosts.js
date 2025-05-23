@@ -1,5 +1,5 @@
 import React from 'react';
-import './ManagePosts.css';
+import '../styles/ManagePost.css';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 
 const posts = [

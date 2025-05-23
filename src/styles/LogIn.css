@@ -14,7 +14,7 @@
 
 .login-form h1 {
   font-size: 70px;
-  color: #0070ff;
+  color: #000000;
   margin-bottom: 80px;
   border-bottom: 5px solid #0070ff;
   display: inline-block;
@@ -31,7 +31,7 @@
 .login-form input[type="text"],
 .login-form input[type="password"] {
   width: 90%;
-  color: #CCE0FF;
+  color: #000000;
   padding: 25px;
   margin-bottom: 20px;
   border-radius: 10px;
