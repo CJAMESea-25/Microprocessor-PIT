@@ -1,0 +1,98 @@
+/* Global Container */
+.board-container {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: white;
+  color: black;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: auto;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header .logo {
+  display: flex;
+  align-items: center;
+}
+
+header .logo img 
+{
+  width: 50px;
+  height: auto;
+}
+
+.logo h1 {
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.back-button {
+  font-weight: bold;
+  color: #0056ff;
+  text-decoration: none;
+  font-size: 1.1rem;
+  margin-right: 5rem;
+}
+
+/* Title */
+.main-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #0066ff;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* Section Titles */
+.section-title {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #444;
+  margin-bottom: 1rem;
+}
+
+/* Emergency Alert Box */
+.alert-box {
+  border: 1px solid #aaa;
+  padding: 1rem;
+  border-radius: 12px;
+  max-width: 600px;
+  background-color: #f9f9f9;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.alert-box h4 {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.posted-date {
+  font-style: italic;
+  font-size: 0.9rem;
+  color: gray;
+  margin-bottom: 0.5rem;
+}
+
+/* Announcements */
+.announcements-section {
+  margin-top: 3rem;
+}
+
+.announcement-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.announcement-card {
+  background: #f9f9f9;
+  border: 1px solid #aaa;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.05);
+}

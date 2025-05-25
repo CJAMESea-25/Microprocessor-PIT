@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import LogIn from './pages/LogIn';
 import ManagePosts from './pages/ManagePosts';
+import ViewBulletin from './pages/ViewBulletin';
 
 export default function AppRouter() {
   return (
@@ -11,7 +12,10 @@ export default function AppRouter() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LogIn />} />
         <Route path="/manage-post" element={<ManagePosts />} />
+        <Route path="/view-bulletin" element={<ViewBulletin />} />
+        <Route path="/landing-page" element={<LandingPage/>} />
       </Routes>
     </Router>
   );
 }
+
