@@ -1,11 +1,29 @@
-// src/pages/LogIn.js
-import React from 'react';
+import React, { useState } from 'react';
 import '../styles/LogIn.css';
 import logo from '../assets/BayadBoardLogo.png';
 import adminIllustration from '../assets/AdminLogIn.png';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from './firebase';  // adjust path to your firebase.js location
 
 const LogIn = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      navigate('/'); //butang diri dashboard na route
+    } catch (err) {
+      setError('Invalid email or password.');
+    }
+  };
+
   return (
     <div>
       <header>
@@ -23,13 +41,30 @@ const LogIn = () => {
             Community Digital Bulletin Board. Please log in to manage and publish official announcements.
           </p>
 
-          <form>
-            <input type="text" placeholder="Username" required />
-            <input type="password" placeholder="Password" required />
-            <div className="buttons">
-              <Link to="/" className="btn dark">GO BACK</Link>
-              {/* Temporarily go to landing page until dashboard exists */}
-              <Link to="/" className="btn blue">LOG IN</Link>
+          <form onSubmit={handleLogin}>
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            {error && (<div className="error"><span className="error-icon"></span>{error}</div>)}
+
+            <div className="login-buttons">
+              <button type="button" className="btn dark" onClick={() => navigate('/')}>
+                GO BACK
+              </button>
+              <button type="submit" className="btn blue">
+                LOG IN
+              </button>
             </div>
           </form>
         </section>

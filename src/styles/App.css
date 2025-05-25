@@ -1,17 +1,19 @@
-/* App.css */
-
-/* Reset */
 * {
-  margin-top: 10px;
-  margin-left: 8px;
+  margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Arial', sans-serif;
 }
 
-/* Body */
+
 body {
+  font-family: 'Inter', sans-serif;
   background-color: #ffffff;
-  color: #333;
+  color: #333333;
   padding: 10px;
+  margin: 0;
+}
+
+.container {
+  margin-top: 10px;
+  margin-left: 8px;
 }
