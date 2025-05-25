@@ -3,7 +3,6 @@ import '../styles/LandingPage.css';
 import logo from '../assets/BayadBoardLogo.png';
 import title from '../assets/title.png';
 import illustration from '../assets/LandingPage.png';
-import { Link } from 'react-router-dom';
 
 const LandingPage = () => {
   return (
@@ -25,7 +24,7 @@ const LandingPage = () => {
             guarantee accurate and timely information for everyone.
           </p>
           <div className="buttons">
-            <Link to="/view-bulletin" className="btn dark">VIEW BULLETIN</Link>
+            <a href="/view-bulletin" className="btn dark">VIEW BULLETIN</a>
             <a href="/login" className="btn blue">ADMIN LOGIN</a>
           </div>
         </section>
