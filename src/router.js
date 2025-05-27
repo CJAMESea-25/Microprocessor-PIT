@@ -1,5 +1,6 @@
 // src/router.js
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import Dashboard from './pages/Dashboard';
 import LandingPage from './pages/LandingPage';
 import LogIn from './pages/LogIn';
 import ManagePosts from './pages/ManagePosts';
@@ -11,6 +12,7 @@ export default function AppRouter() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LogIn />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/manage-post" element={<ManagePosts />} />
         <Route path="/view-bulletin" element={<ViewBulletin />} />
         <Route path="/landing-page" element={<LandingPage/>} />

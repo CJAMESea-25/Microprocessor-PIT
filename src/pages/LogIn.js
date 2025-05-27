@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import '../styles/LogIn.css';
-import logo from '../assets/BayadBoardLogo.png';
-import adminIllustration from '../assets/AdminLogIn.png';
-import { useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from './firebase';  // adjust path to your firebase.js location
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import adminIllustration from '../assets/AdminLogIn.png';
+import logo from '../assets/BayadBoardLogo.png';
+import '../styles/LogIn.css';
+import { auth } from './firebase'; // adjust path to your firebase.js location
 
 const LogIn = () => {
   const [email, setEmail] = useState('');
@@ -18,7 +18,7 @@ const LogIn = () => {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate('/'); //butang diri dashboard na route
+      navigate('/Dashboard'); //butang diri dashboard na route
     } catch (err) {
       setError('Invalid email or password.');
     }
