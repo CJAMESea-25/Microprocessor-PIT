@@ -1,18 +1,18 @@
 /* Global Container */
 .board-container {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: white;
   color: black;
   padding: 2rem;
-  max-width: auto;
+  max-width: 1200px;
+  width: 100%;
   margin: auto;
 }
 
 /* Header */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.header 
+{
+  display: block;
+  margin-bottom: 1rem;
 }
 
 header .logo {
@@ -31,68 +31,147 @@ header .logo img
   font-weight: bold;
 }
 
-.back-button {
+.back-button 
+{
   font-weight: bold;
   color: #0056ff;
   text-decoration: none;
-  font-size: 1.1rem;
-  margin-right: 5rem;
+  font-size: 1.5rem;
+ /*margin-top: 1.5rem; */
+
 }
 
 /* Title */
-.main-title {
-  font-size: 2.5rem;
+
+.title-bar
+ {
+  display: flex;                
+  align-items: center;          
+  justify-content: space-between;
+  margin-top: 0rem;             
+  margin-bottom: 2rem;   
+  /*border-bottom: 1px solid #aaa; */
+ /* padding-bottom: 1rem;     */ 
+}
+
+.main-title 
+{
+  font-size: 4rem;
   font-weight: bold;
   color: #0066ff;
-  margin-top: 2rem;
-  margin-bottom: 2rem;
+  line-height: 1.2;
+  text-align: right;
 }
 
-/* Section Titles */
-.section-title {
-  font-size: 1.3rem;
-  font-weight: bold;
-  color: #444;
-  margin-bottom: 1rem;
-}
+
+
 
 /* Emergency Alert Box */
-.alert-box {
+.alerts-section
+{
+  margin-top: 0;
+  margin-bottom: 3rem;
+}
+.alerts-section h3
+{
+font-size: 1.5rem;
+  font-weight: bold;
+  color: #000;
+  margin-top:0;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #aaa;
+  padding-bottom: 0.5rem;
+}
+.alert-box
+{
   border: 1px solid #aaa;
-  padding: 1rem;
+  padding: 5rem;
   border-radius: 12px;
   max-width: 600px;
   background-color: #f9f9f9;
   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.alert-box h4 {
+.alert-box h4 
+{
   font-weight: bold;
-  font-size: 1.1rem;
-}
+  font-size: 1.3rem;
+  text-align: center;
 
-.posted-date {
+  color:#000000;
+
+}
+.alert-box p 
+{
+  font-size: 1rem;       /* Example: set a specific font size */
+  line-height: 1.5;      /* Example: adjust line spacing */
+  color: #333;           /* Example: set a specific color */
+  margin-top: 1rem;      /* Example: add space above the paragraph */
+  margin-bottom: 0;      /* Example: remove space below the last paragraph */
+  /* You can remove text-align: center; from .alert-box h4 or .posted-date if it's currently affecting this p */
+  /* If you want this paragraph left-aligned, you might need to ensure no parent is centering text */
+  text-align: left; /* Example: explicitly left-align the text if a parent is centering it */
+}
+.posted-date
+ {
   font-style: italic;
   font-size: 0.9rem;
   color: gray;
   margin-bottom: 0.5rem;
+  text-align: center;
 }
 
 /* Announcements */
-.announcements-section {
+.announcements-section
+{
   margin-top: 3rem;
 }
 
-.announcement-grid {
+.announcement-grid 
+{
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 1rem;
 }
 
-.announcement-card {
+.announcement-card 
+{
   background: #f9f9f9;
   border: 1px solid #aaa;
-  padding: 1rem;
+  padding: 5rem;
   border-radius: 12px;
   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.05);
 }
+
+.announcement-card h4
+{
+  font-size: 1.3rem;
+  font-weight: bold;
+  color:#000000;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  text-align:center;
+}
+
+/* Container for logo and back button */
+.logo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* Logo styling */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logo h1 {
+  font-size: 32px;
+  font-weight: bold;
+  margin: 0;
+}
+
+
+
