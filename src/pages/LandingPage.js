@@ -15,8 +15,8 @@ const LandingPage = () => {
       </header>
 
       <main className="landing">
+        <h1>COMMUNITY DIGITAL BULLETIN BOARD</h1>
         <section className="text-content">
-          <img src={title} alt="title" />
           <p>
             Stay informed with real-time updates from your local barangay, school, subdivision, or office.
             This centralized digital bulletin board ensures you never miss important announcements, emergency

@@ -12,11 +12,13 @@ header .logo img {
 }
 
 /* Layout */
-.landing {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 0;
+.landing h1{
+  font-size: 70px;
+  font-weight: 700;
+  color: #0070ff;
+  margin-bottom: 80px;
+  display: inline-block;
+  padding-bottom: 5px;
 }
 
 /* Text */
@@ -24,10 +26,6 @@ header .logo img {
   margin-left: 50px;
   max-width: 55%;
   padding-right: 50px;
-}
-
-.text-content h1 {
-  margin-bottom: 1000px;
 }
 
 .text-content p {

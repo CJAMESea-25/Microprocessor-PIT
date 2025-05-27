@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import sidebar from '../assets/BayadBoardLogo.png';
 import '../styles/Dashboard.css';
-
+import ManagePosts from './ManagePosts';
 
 const { TextArea, Search } = Input;
 const { Option } = Select;

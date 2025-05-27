@@ -13,7 +13,7 @@ const ViewBulletin = () => {
           <img src={logo} alt="BayanBoard Logo" />
           <h1>BayanBoard</h1>
         </div>
-         <Link to="/landing-page" className="back-button">← BACK</Link>
+         <Link to="/" className="back-button">← BACK</Link>
       </header>
 
       {/* Title */}
