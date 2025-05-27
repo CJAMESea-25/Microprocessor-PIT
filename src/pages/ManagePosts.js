@@ -141,8 +141,8 @@ export default function ManagePosts() {
         <nav>
           <ul>
             <li onClick={() => navigate('/Dashboard')}>Dashboard</li>
-            <li className="active">Manage All Post</li>
-            <li onClick={() => navigate('/view-bulletin')}>View Bulletin</li>
+            <li className="active">Manage All Posts</li>
+            <li onClick={() => navigate('/admin-view')}>View Bulletin</li>
           </ul>
         </nav>
         <a href="/" className="logout">Log Out</a>

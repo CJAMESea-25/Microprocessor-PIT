@@ -8,16 +8,19 @@
 .login-form {
   max-width: 45%;
   padding: 20px 50px;
+
 }
 
 .login-form h1 {
-  font-size: 70px;
-  font-weight: 700;
-  color: #000000;
-  margin-bottom: 80px;
-  border-bottom: 5px solid #0070ff;
+  font-size: 65px;
+  font-weight: 800;
+  color: #0070ff;
+  margin-bottom: 20px;
+  border-bottom: 10px solid #0070ff;
   display: inline-block;
   padding-bottom: 5px;
+  letter-spacing: 0.5rem;
+  margin-left: 20px;
 }
 
 .login-form p {
@@ -25,6 +28,7 @@
   margin: 20px 0 30px;
   line-height: 1.5;
   margin-bottom: 50px;
+  margin-left: 20px;
 }
 
 .login-form input[type="text"],
@@ -39,23 +43,33 @@
   border: none;
   background-color: #d7e3ff;
   font-size: 18px;
+  margin-left: 15px;
 }
 
 
 .login-buttons {
   display: flex;
   gap: 30px;
+  margin-top: 30px;
+  margin-left: 15px;
+
 }
 
 
 .btn {
   cursor: pointer;
   padding: 25px 50px;
-  font-size: 18px;
+  font-size: 16px;
   border-radius: 10px;
   border: none;
   user-select: none;
   transition: background-color 0.5s ease, transform 0.5s ease;
+  border-radius: 50px;
+  width: 250px;
+  height: 65px;
+  text-align: center;
+  font-weight: 600;
+
 }
 
 .error {

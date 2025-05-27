@@ -1,58 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Jomhuria&display=swap');
+
 header .logo {
+  color: black;
+  margin-top: 30px;
+  margin-left: 50px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 32px;
-  font-weight: bold;
+  font-size: 65px;
+  font-family: 'Jomhuria', cursive;
+}
+header .logo span{
+  margin-top: 15px;
+
 }
 
 header .logo img {
   width: 50px;
   height: auto;
 }
-
-/* Layout */
-.landing h1{
-  font-size: 70px;
-  font-weight: 700;
-  color: #0070ff;
-  margin-bottom: 80px;
-  display: inline-block;
-  padding-bottom: 5px;
+.landing {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: auto;
 }
 
-/* Text */
 .text-content {
-  margin-left: 50px;
-  max-width: 55%;
-  padding-right: 50px;
+  max-width: 45%;
+  margin-left: 75px;
+  margin-top: 10px;
+}
+
+.text-content h1{
+  max-width: 100%;
+  font-size: 80px;
+  letter-spacing: 18px;
+  line-height: 70px;
+  font-weight: 800;
+  color: #0070ff;
+  margin-bottom: 60px;
+  display: inline-block;
+  margin-left: 40px;
 }
 
 .text-content p {
-  margin-top: 50px;
-  font-size: 25px;
+  color: black;
+  margin-top: -40px;
+  font-size: 20px;
   margin-bottom: 30px;
-  line-height: 1.5;
+  line-height: 1.2;
+  margin-left: 40px;
+  margin-right: 80px;
+  font-weight: 400;
 }
 
 /* Buttons */
 .buttons .btn {
   padding: 25px 50px;
-  border-radius: 10px;
+  border-radius: 50px;
   text-decoration: none;
   font-weight: bold;
   margin-right: 50px;
   display: inline-block;
+  margin-left: 50px;
+  margin-top: 15px;
+  width: 250px;
+}
+.buttons a{
+  text-align: center;
 }
 
 .btn.dark {
   background-color: #3a4a52;
-  color: white;
 }
 
 .btn.blue {
   background-color: #0070ff;
-  color: white;
+  margin-left: -5px;
+  
 }
 
 /* Illustration */
@@ -61,6 +86,8 @@ header .logo img {
 }
 
 .illustration img {
-  width: 1000px;
+  width: 700px;
+  margin-top: 70px;
   max-width: 100%;
+    margin-left: -100px; 
 }
