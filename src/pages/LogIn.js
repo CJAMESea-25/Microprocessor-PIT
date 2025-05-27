@@ -3,8 +3,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import adminIllustration from '../assets/AdminLogIn.png';
 import logo from '../assets/BayadBoardLogo.png';
+import { auth } from '../firebase'; // adjust path to your firebase.js location
 import '../styles/LogIn.css';
-import { auth } from './firebase'; // adjust path to your firebase.js location
 
 const LogIn = () => {
   const [email, setEmail] = useState('');

@@ -97,14 +97,14 @@ body {
 
 
 .controls {
-  display: flex;
-  gap: 1rem;
+  display: auto;
+  gap: 2rem;
   flex-wrap: wrap;
 }
 
 .controls input,
 .controls select {
-  padding: 10px 15px;
+  padding: 5px 10px;
   border: 1px solid #ccc;
   border-radius: 8px;
   flex-grow: 1;
@@ -196,4 +196,12 @@ body {
   border: none;
   border-radius: 6px;
   cursor: pointer;
+}
+
+.controls div {
+  margin-bottom: 10px;
+}
+.controls label {
+  display: block;
+  margin-bottom: 5px;
 }

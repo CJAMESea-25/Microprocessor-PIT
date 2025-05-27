@@ -1,40 +1,46 @@
 import { PlusOutlined } from '@ant-design/icons';
-import { Button, Form, Image, Input, Select, Space, Upload } from 'antd';
-import { useState } from 'react';
+import { Button, Form, Image, Input, Select, Space, Upload, message } from 'antd';
+import { addDoc, collection, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import sidebar from '../assets/BayadBoardLogo.png';
+import { db } from '../firebase';
 import '../styles/Dashboard.css';
-import ManagePosts from './ManagePosts';
 
 const { TextArea, Search } = Input;
 const { Option } = Select;
 
-const getBase64 = file =>
+const getBase64 = (file) =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => resolve(reader.result);
-    reader.onerror = error => reject(error);
+    reader.onerror = (error) => reject(error);
   });
 
-const SubmitButton = ({ form, children }) => {
+const SubmitButton = ({ form }) => {
   const [submittable, setSubmittable] = useState(false);
   const values = Form.useWatch([], form);
 
-  useState(() => {
+  useEffect(() => {
     form
       .validateFields({ validateOnly: true })
-      .then(() => setSubmittable(true))
-      .catch(() => setSubmittable(false));
+      .then(() => {
+        console.log('Form validation passed, values:', values);
+        setSubmittable(true);
+      })
+      .catch((errors) => {
+        console.log('Form validation failed:', errors);
+        setSubmittable(false);
+      });
   }, [form, values]);
 
   return (
     <Button type="primary" htmlType="submit" disabled={!submittable}>
-      {children}
+      ADD POST
     </Button>
   );
 };
-
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -42,53 +48,135 @@ export default function Dashboard() {
   const [previewImage, setPreviewImage] = useState('');
   const [fileList, setFileList] = useState([]);
   const [posts, setPosts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [form] = Form.useForm();
 
-  const handlePreview = async file => {
-    if (!file.url && !file.preview) {
-      file.preview = await getBase64(file.originFileObj);
+  // Fetch categories from Firestore
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'categories'), (snapshot) => {
+      const fetchedCategories = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        name: doc.data().name,
+      }));
+      console.log('Fetched categories:', fetchedCategories);
+      setCategories(fetchedCategories);
+      if (!fetchedCategories.length) {
+        message.warning('No categories found in Firestore. Using defaults.');
+        setCategories([
+          { id: 'cat1', name: 'Emergency Alerts' },
+          { id: 'cat3', name: 'General Announcements' },
+          { id: 'cat4', name: 'Community News' },
+          { id: 'cat5', name: 'Reminders or Notices' },
+        ]);
+      }
+    }, (error) => {
+      console.error('Error fetching categories:', error.message, 'Code:', error.code);
+      message.error('Failed to load categories. Using defaults.');
+      setCategories([
+          { id: 'cat1', name: 'Emergency Alerts' },
+          { id: 'cat3', name: 'General Announcements' },
+          { id: 'cat4', name: 'Community News' },
+          { id: 'cat5', name: 'Reminders or Notices' },
+      ]);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Fetch posts from Firestore in real-time
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'posts'), (snapshot) => {
+      const fetchedPosts = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      console.log('Fetched posts:', fetchedPosts);
+      setPosts(fetchedPosts);
+    }, (error) => {
+      console.error('Error fetching posts:', error.message, 'Code:', error.code);
+      message.error('Failed to load posts');
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handlePreview = async (file) => {
+    try {
+      if (!file.url && !file.preview) {
+        file.preview = await getBase64(file.originFileObj);
+      }
+      setPreviewImage(file.url || file.preview);
+      setPreviewOpen(true);
+    } catch (error) {
+      console.error('Error previewing image:', error);
+      message.error('Failed to preview image');
     }
-    setPreviewImage(file.url || file.preview);
-    setPreviewOpen(true);
   };
 
-  const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
-
-  const categoryOptions = [
-    'Emergency Alerts 🚨',
-    'Community Events 📅',
-    'General Announcements 📢',
-    'Reminders or Notices📝',
-  ];
+  const handleChange = ({ fileList: newFileList }) => {
+    console.log('Updated fileList:', newFileList);
+    setFileList(newFileList);
+  };
 
   const getIcon = (cat) => {
-    if (cat.includes('Community Events')) return '📅';
+    if (!cat) return '📌';
+    if (cat.includes('Emergency Alerts')) return '🚨';
     if (cat.includes('General Announcements')) return '📢';
-    if (cat.includes('Reminders')) return '📝';
-    if (cat.includes('Disaster') || cat.includes('Emergency')) return '🚨';
-    if (cat.includes('Weather')) return '🌧️';
+    if (cat.includes('Community Events')) return '📅';
+    if (cat.includes('Reminders or Notices')) return '📝';
     return '📌';
   };
 
-  const handleAddPost = values => {
-    if (!values.category || !values.title || !values.description || fileList.length === 0) return;
+  const handleAddPost = async (values) => {
+    console.log('handleAddPost called with values:', values, 'fileList:', fileList);
+    if (!values.category || !values.title || !values.description) {
+      console.log('Validation failed: Missing fields');
+      message.error('Please fill out all required fields');
+      return;
+    }
 
-    const newPost = {
-      id: Date.now(),
-      icon: getIcon(values.category),
-      title: values.title,
-      category: values.category,
-      content: values.description,
-    };
+    try {
+      // Convert all images to Base64 (if any)
+      const imageUrls = fileList.length > 0 ? await Promise.all(fileList.map((file) => 
+        getBase64(file.originFileObj))) : [];
+      console.log('Images converted to Base64:', imageUrls);
 
-    setPosts([newPost, ...posts]);
-    form.resetFields();
-    setFileList([]);
+      // Save post to Firestore with specified sequence
+      const categoryName = categories.find((cat) => cat.id === values.category)?.name || '';
+      const newPost = {
+        category: categoryName,
+        title: values.title,
+        content: values.description,
+        imageUrl: imageUrls,
+        timestamp: new Date().toISOString(),
+      };
+
+      console.log('Saving post to Firestore:', newPost);
+      const docRef = await addDoc(collection(db, 'posts'), newPost).catch((error) => {
+        throw new Error(`Firestore write failed: ${error.message}`);
+      });
+      console.log('Post saved successfully with ID:', docRef.id);
+
+      form.resetFields();
+      setFileList([]);
+      message.success('Post added successfully');
+    } catch (error) {
+      console.error('Error adding post:', error.message, 'Code:', error.code);
+      message.error(`Failed to add post: ${error.message}`);
+    }
   };
 
-  const filteredPosts = posts.filter(post =>
-    post.title.toLowerCase().includes(searchTerm.toLowerCase())
+  const handleDeletePost = async (postId) => {
+    try {
+      await deleteDoc(doc(db, 'posts', postId));
+      message.success('Post deleted successfully');
+    } catch (error) {
+      console.error('Error deleting post:', error.message, 'Code:', error.code);
+      message.error('Failed to delete post');
+    }
+  };
+
+  const filteredPosts = posts.filter((post) =>
+    post?.title ? post.title.toLowerCase().includes(searchTerm.toLowerCase()) : false
   );
 
   const uploadButton = (
@@ -117,11 +205,11 @@ export default function Dashboard() {
 
       <main className="main-content">
         <div className="container">
-          {/* Left Section */}
           <section className="form-section">
             <h2>DASHBOARD</h2>
             <h2>📝 Create New Post</h2>
-            <p>Fill out the form below to publish a new bulletin post. All posts will be displayed on the public board after submission.</p>
+            <p>Fill out the form below to publish a new bulletin post. All posts will be displayed
+              on the public board after submission. Photo upload is optional.</p>
 
             <Form
               form={form}
@@ -133,9 +221,11 @@ export default function Dashboard() {
                 name="category"
                 rules={[{ required: true, message: 'Category is required' }]}
               >
-                <Select placeholder="Select a category">
-                  {categoryOptions.map(option => (
-                    <Option key={option} value={option}>{option}</Option>
+                <Select placeholder="Select a category" loading={!categories.length}>
+                  {categories.map((category) => (
+                    <Option key={category.id} value={category.id}>
+                      {category.name}
+                    </Option>
                   ))}
                 </Select>
               </Form.Item>
@@ -154,16 +244,11 @@ export default function Dashboard() {
                 <TextArea placeholder="Description..." autoSize={{ minRows: 3, maxRows: 6 }} />
               </Form.Item>
 
-              <Form.Item rules={[{
-                validator: () =>
-                  fileList.length > 0
-                    ? Promise.resolve()
-                    : Promise.reject(new Error('At least one image is required'))
-              }]}>
+              <Form.Item>
                 <Upload
                   listType="picture-circle"
                   fileList={fileList}
-                  beforeUpload={() => false} // prevents automatic upload
+                  beforeUpload={() => false}
                   onPreview={handlePreview}
                   onChange={handleChange}
                 >
@@ -174,8 +259,8 @@ export default function Dashboard() {
                     wrapperStyle={{ display: 'none' }}
                     preview={{
                       visible: previewOpen,
-                      onVisibleChange: visible => setPreviewOpen(visible),
-                      afterOpenChange: visible => !visible && setPreviewImage(''),
+                      onVisibleChange: (visible) => setPreviewOpen(visible),
+                      afterOpenChange: (visible) => !visible && setPreviewImage(''),
                     }}
                     src={previewImage}
                   />
@@ -183,37 +268,42 @@ export default function Dashboard() {
               </Form.Item>
 
               <Form.Item>
-                <SubmitButton form={form}>ADD POST</SubmitButton>
+                <SubmitButton form={form} />
               </Form.Item>
             </Form>
           </section>
         </div>
       </main>
 
-          {/* Right Section */}
-          <section className="post-section">
-            <h2>All Posts</h2>
-            <p>Click on a post title below to view or edit its full content.</p>
-            <Space direction="vertical" style={{ width: '100%' }}>
-              <Search
-                placeholder="Search title"
-                allowClear
-                enterButton="Search"
-                size="middle"
-                onSearch={(value) => setSearchTerm(value)}
-                onChange={e => setSearchTerm(e.target.value)}
-              />
-            </Space>
+      <section className="post-section">
+        <h2>All Posts</h2>
+        <p>Click on a post title below to view or edit its full content.</p>
+        <Space direction="vertical" style={{ width: '100%' }}>
+          <Search
+            placeholder="Search title"
+            allowClear
+            enterButton="Search"
+            size="middle"
+            onSearch={(value) => setSearchTerm(value)}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </Space>
 
-            <ul className="post-list">
-              {filteredPosts.map(post => (
-                <li key={post.id}>
-                  <strong>{post.icon} {post.title}</strong>
-                  <p>{post.content.substring(0, 40)}...</p>
-                </li>
-              ))}
-            </ul>
-          </section>
+        <ul className="post-list">
+          {filteredPosts.map((post) => (
+            <li key={post.id}>
+              <strong>
+                {post.icon || '📌'} {post.title} (
+                {categories.find((cat) => cat.name === post.category)?.name || 'Unknown'})
+              </strong>
+              <p>{post.content.substring(0, 40)}...</p>
+              <Button type="link" danger onClick={() => handleDeletePost(post.id)}>
+                Delete
+              </Button>
+            </li>
+          ))}
+        </ul>
+      </section>
     </div>
   );
 }
