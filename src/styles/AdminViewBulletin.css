@@ -1,0 +1,67 @@
+body {
+  margin: 0;
+  background-color: #f8f9fa;
+  
+}
+
+.manage-container {
+  display: flex;
+  min-height: 90vh;
+}
+
+.sidebar {
+  width: 250px;
+  height: 900px;
+  background-color: white;  
+  color: #2c3e50;           
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center; 
+  gap: 10px;
+  margin-bottom: 2rem;
+}
+
+.sidebar-logo {
+  width: 40px;
+  height: auto;
+  display: block; 
+}
+.view-main-content{
+flex-grow: 1;
+  padding: 2rem;
+   max-height: 80vh;   
+  overflow-y: auto;    
+  overflow-x: hidden;  
+}
+
+
+.view-bulletin {
+  background-color: #CCE0FF;
+  padding: 2rem;
+  border-radius: 10px;
+  width: 1220px;
+  
+  
+}
+
+.bulletin-posts {
+background-color: white;
+ margin-top: 1rem;
+  flex-direction: column;
+  padding: 1rem;
+  border-radius: 10px;
+  width: 1160px;
+
+}
+
+
+.post-date {
+  font-size: 0.9rem;
+  color: #888;
+}

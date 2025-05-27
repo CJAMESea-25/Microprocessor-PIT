@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import sidebar from '../assets/BayadBoardLogo.png';
 import '../styles/Dashboard.css';
-import ManagePosts from './ManagePosts';
 
 const { TextArea, Search } = Input;
 const { Option } = Select;
@@ -108,8 +107,8 @@ export default function Dashboard() {
         <nav>
           <ul>
             <li className="active">Dashboard</li>
-            <li onClick={() => navigate('/manage-posts')}>Manage All Post</li>
-            <li onClick={() => navigate('/view-bulletin')}>View Bulletin</li>
+            <li onClick={() => navigate('/manage-posts')}>Manage All Posts</li>
+            <li onClick={() => navigate('/admin-view')}>View Bulletin</li>
           </ul>
         </nav>
         <a href="/" className="logout">Log Out</a>

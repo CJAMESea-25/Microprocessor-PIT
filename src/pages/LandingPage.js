@@ -1,7 +1,6 @@
 import React from 'react';
 import '../styles/LandingPage.css';
 import logo from '../assets/BayadBoardLogo.png';
-import title from '../assets/title.png';
 import illustration from '../assets/LandingPage.png';
 
 const LandingPage = () => {
@@ -15,8 +14,8 @@ const LandingPage = () => {
       </header>
 
       <main className="landing">
-        <h1>COMMUNITY DIGITAL BULLETIN BOARD</h1>
         <section className="text-content">
+          <h1>COMMUNITY<br/>DIGITAL<br/>BULLETIN<br/>BOARD</h1>
           <p>
             Stay informed with real-time updates from your local barangay, school, subdivision, or office.
             This centralized digital bulletin board ensures you never miss important announcements, emergency

@@ -30,14 +30,17 @@ body {
   width: 40px;
   height: auto;
   display: block; 
+  margin-top: 50px;
+  margin-left: 20px;
 }
 
 .logo-text {
-  font-size: 1.5rem;
-  color: #2c3e50;
-  margin: 0;        
+  color: black;
+  font-weight: 200;
+  margin-top: 65px;        
   line-height: 1;   
-  font-weight: 700; 
+    font-size: 50px;
+  font-family: 'Jomhuria', cursive;
 }
 
 .sidebar nav ul {
@@ -92,7 +95,7 @@ body {
 
 .main-content h1 {
   margin: 0;
-  color: #2c3e50;
+  color: black;
 }
 
 
