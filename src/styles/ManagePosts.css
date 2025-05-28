@@ -39,7 +39,7 @@ body {
   font-weight: 200;
   margin-top: 65px;        
   line-height: 1;   
-    font-size: 50px;
+  font-size: 50px;
   font-family: 'Jomhuria', cursive;
 }
 
@@ -58,7 +58,7 @@ body {
 
 .sidebar nav li:hover,
 .sidebar nav .active {
-  background-color: #d0e7ff; /* light blue highlight */
+  background-color: #d0e7ff; 
 }
 
 .sidebar .logout {
@@ -77,7 +77,7 @@ body {
 
 .container {
   background-color: #CCE0FF; 
-  font-size:  20px;;
+  font-size: 20px;
   border-radius: 10px;
   padding: 2rem;
   box-sizing: border-box;
@@ -85,33 +85,49 @@ body {
   flex-direction: column;
   gap: 1.5rem;
   max-width: 100%;
-  
-
   max-height: 80vh;   
   overflow-y: auto;    
   overflow-x: hidden;  
 }
-
 
 .main-content h1 {
   margin: 0;
   color: black;
 }
 
-
 .controls {
-  display: auto;
-  gap: 2rem;
-  flex-wrap: wrap;
+  display: flex;
+  gap: 5rem;
+  align-items: center; 
+  flex-wrap: nowrap; 
 }
 
 .controls input,
 .controls select {
-  padding: 5px 10px;
+  padding: 10px; 
   border: 1px solid #ccc;
+  gap: 10rem;
   border-radius: 8px;
-  flex-grow: 1;
-  min-width: 150px;
+  flex-grow: 0; 
+  min-width: 200px; /* Minimum width for consistency */
+}
+
+
+.controls input[type="text"] {
+  width: 300px; /* Adjusted to a reasonable width based on screenshot */
+  height: 40px; /* Adjusted height for better appearance */
+  font-size: 16px; 
+}
+
+/* Customize label font and alignment */
+.controls label {
+  display: inline-block; /* Changed to inline-block for horizontal alignment */
+  margin-bottom: 0; /* Remove bottom margin to align with inputs */
+  margin-right: 5px; /* Space between label and input */
+  font-size: 16px; 
+  font-weight: bold; 
+  color: #2c3e50; 
+  vertical-align: middle; /* Align label vertically with input */
 }
 
 .posts-table {
@@ -162,7 +178,7 @@ body {
 
 .popup {
   background: white;
-  border-top: 12px solid #d8000c;
+  border-top: 12px solid #0070ff;
   padding: 2rem;
   border-radius: 12px;
   text-align: center;
@@ -199,12 +215,4 @@ body {
   border: none;
   border-radius: 6px;
   cursor: pointer;
-}
-
-.controls div {
-  margin-bottom: 10px;
-}
-.controls label {
-  display: block;
-  margin-bottom: 5px;
 }

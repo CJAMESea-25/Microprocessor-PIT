@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import '../styles/PreviewPost.css';
 
 export default function PreviewPost({ post, onClose, onEdit, onDelete }) {
