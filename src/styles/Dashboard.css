@@ -1,22 +1,23 @@
 body {
   margin: 0;
-  background-color: #f8f9fa;
+  background-color: white;
 }
 
 .manage-container {
   display: flex;
-  min-height: 90vh;
+  min-height: 100vh;
 }
 
 .sidebar {
   width: 250px;
-  height: 900px;
+  height: 100vh;
   background-color: white;  
   color: #2c3e50;           
   padding: 2rem 1rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  box-sizing: border-box; /* ensure padding is included in height */
 }
 
 .sidebar-header {
@@ -61,48 +62,59 @@ body {
   background-color: #d0e7ff; 
 }
 
-.sidebar .logout {
-  text-align: center;
-  color: #2c3e50;
-  text-decoration: underline;
-  font-weight: bold;
-  margin-top: 2rem;
+.logout {
   display: block;
+  margin: 120px auto;
+  padding: 5px 5px;
+  color: white;
+  text-align: center;
+  text-decoration: underline;
+  border-radius: 8px;
+  font-weight: bold;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
+
 
 .main-content {
-  flex-grow: 1;
-  padding: 2rem;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-.container {
-  background-color: #CCE0FF; 
+.main-content .container {
+  background-color: #CCE0FF;
   font-size: 20px;
-  border-radius: 10px;
-  padding: 6rem;
+  border-radius: 50px;
+  padding: 2rem;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   max-width: 100%;
-  max-height: 80vh;   
-  overflow-y: auto;    
+  max-height: 100%;
+  overflow-y: auto;
   overflow-x: hidden;
+  margin-top: -10px;
+  width: 100%;
+  height: 720px;
+
 
 }
-
 
 .container h1 {
   font-size: 50px;
   font-family: 'Inter', sans-serif;
-  font-weight: bolder;
+  font-weight: 800;
+  padding: 2rem;
+
 }
 
 .post {
   background-color: #CCE0FF; 
   font-size: 20px;
   border-radius: 10px;
-  padding: 6rem;
+  padding: 3rem;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -111,141 +123,88 @@ body {
   max-height: 80vh;   
   overflow-y: auto;    
   overflow-x: hidden;
+  margin-top: -60px;
 
 }
 
-
 .post h2 {
-  font-size: 50px;
+  font-size: 30px;
   font-family: 'Inter', sans-serif;
   font-weight: bolder;
   
-  
+}
+.custom-select .ant-select-selector, .custom-title, .custom-description{
+  width: 100%;
+  padding: 8px;
+  border-radius: 10px;
+}
+.custom-title,
+.custom-select {
+  height: 50px;
+}
+.custom-description {
+  min-height: 400px; 
+  padding: 8px;
+  border-radius: 10px;
+}
+.post-button{
+  border-radius: 30px;
+  width: 200px;
+  height: 50px;
+  background-color: #0066FF;
+  color: black;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  margin-left: 450px;
+}
+.post-section {
+  padding-top: 5rem;
+  top: 0; 
+  background-color: white;
+  padding-left: 1rem;
+  padding-right: 1rem;
+
+}
+.post-section h2, .post-section p{
+  margin-bottom: 10px;
+}
+.post-list {
+  list-style: none; 
+  margin-top: 20px; 
+   z-index: 10; 
+  width: 100%; 
+   max-height: 55vh;
+  overflow-y: auto; 
 }
 
-.main-content h1 {
-  margin: 0;
+.post-list li {
+  margin-bottom: 1rem;
+}
+.emerg-button h1{
+  font-family: 'Inter', sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+  margin-bottom: 50px;
+  margin-left: 150px;
+  letter-spacing: 0.1rem;
   color: black;
 }
 
-.controls {
-  display: flex;
-  gap: 5rem;
-  align-items: center; 
-  flex-wrap: nowrap; 
-}
-
-.controls input,
-.controls select {
-  padding: 10px; 
-  border: 1px solid #ccc;
-  gap: 10rem;
-  border-radius: 8px;
-  flex-grow: 0; 
-  min-width: 200px; /* Minimum width for consistency */
-}
-
-
-.controls input[type="text"] {
-  width: 300px; /* Adjusted to a reasonable width based on screenshot */
-  height: 40px; /* Adjusted height for better appearance */
-  font-size: 16px; 
-}
-
-/* Customize label font and alignment */
-.controls label {
-  display: inline-block; /* Changed to inline-block for horizontal alignment */
-  margin-bottom: 0; /* Remove bottom margin to align with inputs */
-  margin-right: 5px; /* Space between label and input */
-  font-size: 16px; 
-  font-weight: bold; 
-  color: #2c3e50; 
-  vertical-align: middle; /* Align label vertically with input */
-}
-
-.posts-table {
-  width: 100%;
-  border-collapse: collapse;
-  background-color: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-}
-
-.posts-table th,
-.posts-table td {
-  padding: 1rem;
-  text-align: left;
-  border-bottom: 1px solid #eee;
-}
-
-.posts-table .emoji {
-  margin-right: 0.5rem;
-}
-
-.icon-btn {
-  background: none;
+.search-bar .ant-input-search-button {
+  background-color: #455A64;
+  border-radius: 10px;
   border: none;
-  cursor: pointer;
-  margin-right: 0.5rem;
-  font-size: 1rem;
-  color: #34495e;
-}
-
-.icon-btn:hover {
-  color: #007bff;
-}
-
-.popup-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-}
-
-.popup {
-  background: white;
-  border-top: 12px solid #0070ff;
-  padding: 2rem;
-  border-radius: 12px;
-  text-align: center;
-  width: 90%;
-  max-width: 400px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-}
-
-.popup h3 {
-  color: #D2042D;
-  margin-bottom: 1rem;
-}
-
-.popup-buttons {
-  margin-top: 1.5rem;
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-}
-
-.popup-buttons .confirm {
-  background-color: #D2042D;
   color: white;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
 }
 
-.popup-buttons .cancel {
-  background-color: #7f8c8d;
-  color: white;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
+.search-bar .ant-input {
+  border-radius: 10px;
+  padding-left: 15px;
 }
+
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined , SearchOutlined} from '@ant-design/icons';
 import { Button, Form, Image, Input, Select, Space, Upload, message } from 'antd';
 import { addDoc, collection, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import sidebar from '../assets/BayadBoardLogo.png';
 import { db } from '../firebase';
 import '../styles/Dashboard.css';
+
 
 const { TextArea, Search } = Input;
 const { Option } = Select;
@@ -36,7 +37,7 @@ const SubmitButton = ({ form }) => {
   }, [form, values]);
 
   return (
-    <Button type="primary" htmlType="submit" disabled={!submittable}>
+    <Button className="post-button" type="primary" htmlType="submit" disabled={!submittable}>
       ADD POST
     </Button>
   );
@@ -243,6 +244,7 @@ export default function Dashboard() {
         </nav>
         <a href="/" className="logout">Log Out</a>
       </aside>
+      
 
       <main className="main-content">
         <div className="container">
@@ -254,112 +256,120 @@ export default function Dashboard() {
             <p>Fill out the form below to publish a new bulletin post. All posts will be displayed
               on the public board after submission. Photo upload is optional.</p>
 
-            <Form
+           <Form
               form={form}
               layout="vertical"
               autoComplete="off"
               onFinish={handleAddPost}
+>
+            <Form.Item
+              name="category"
+              rules={[{ required: true, message: 'Category is required' }]}
             >
-              <Form.Item
-                name="category"
-                rules={[{ required: true, message: 'Category is required' }]}
-              >
-                <Select placeholder="Select a category" loading={!categories.length}>
-                  {categories.map((category) => (
-                    <Option key={category.id} value={category.id}>
-                      {category.name}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
+              <Select className="custom-select" placeholder="Select a category" loading={!categories.length}>
+                {categories.map((category) => (
+                  <Option key={category.id} value={category.id}>
+                    {category.name}
+        </Option>
+      ))}
+    </Select>
+  </Form.Item>
 
-              <Form.Item
-                name="title"
-                rules={[{ required: true, message: 'Title is required' }]}
-              >
-                <Input placeholder="Title" />
-              </Form.Item>
+  <Form.Item
+    name="title"
+    rules={[{ required: true, message: 'Title is required' }]}
+  >
+    <Input className="custom-title" placeholder="Title" />
+  </Form.Item>
 
-              <Form.Item
-                name="description"
-                rules={[{ required: true, message: 'Description is required' }]}
-              >
-                <TextArea placeholder="Description..." autoSize={{ minRows: 3, maxRows: 6 }} />
-              </Form.Item>
+  <Form.Item
+    name="description"
+    rules={[{ required: true, message: 'Description is required' }]}
+  >
+    <TextArea
+      className="custom-description"
+      placeholder="Description..."
+      autoSize={{ minRows: 3, maxRows: 10 }}
+    />
+  </Form.Item>
 
-              <Form.Item>
-                <Upload
-                  listType="picture-circle"
-                  fileList={fileList}
-                  beforeUpload={() => false}
-                  onPreview={handlePreview}
-                  onChange={handleChange}
-                >
-                  {fileList.length >= 5 ? null : uploadButton}
-                </Upload>
-                {previewImage && (
-                  <Image
-                    wrapperStyle={{ display: 'none' }}
-                    preview={{
-                      visible: previewOpen,
-                      onVisibleChange: (visible) => setPreviewOpen(visible),
-                      afterOpenChange: (visible) => !visible && setPreviewImage(''),
-                    }}
-                    src={previewImage}
-                  />
-                )}
-              </Form.Item>
+  <Form.Item>
+    <Upload
+      listType="picture-circle"
+      fileList={fileList}
+      beforeUpload={() => false}
+      onPreview={handlePreview}
+      onChange={handleChange}
+    >
+      {fileList.length >= 5 ? null : uploadButton}
+    </Upload>
+    {previewImage && (
+      <Image
+        wrapperStyle={{ display: 'none' }}
+        preview={{
+          visible: previewOpen,
+          onVisibleChange: (visible) => setPreviewOpen(visible),
+          afterOpenChange: (visible) => !visible && setPreviewImage(''),
+        }}
+        src={previewImage}
+      />
+    )}
+  </Form.Item>
 
-              <Form.Item>
-                <SubmitButton form={form} />
-              </Form.Item>
-            </Form>
+  <Form.Item>
+    <SubmitButton form={form} className="post-button" />
+  </Form.Item>
+</Form>
                     </div>
         </div>
       </main>
+     
+    <section className="post-section">
+  <div className="emerg-button">
+    <h1>EMERGENCY</h1>
+  </div>
+  <h2>All Posts</h2>
+  <p>Click on a post title below to view or edit its full content.</p>
+ <Space direction="vertical" style={{ width: '100%' }}>
+    <Search
+      className="search-bar"
+      placeholder="Search title"
+      allowClear
+      enterButton="Search"
+      size="middle"
+      prefix={<SearchOutlined />}
+      onSearch={(value) => setSearchTerm(value)}
+      onChange={(e) => setSearchTerm(e.target.value)}
+    />
+</Space>
 
-      <section className="post-section">
-        <h2>All Posts</h2>
-        <p>Click on a post title below to view or edit its full content.</p>
-        <Space direction="vertical" style={{ width: '100%' }}>
-          <Search
-            placeholder="Search title"
-            allowClear
-            enterButton="Search"
-            size="middle"
-            onSearch={(value) => setSearchTerm(value)}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </Space>
-
-        <ul className="post-list">
-          {filteredPosts.map((post) => (
-            <li key={post.id}>
-              <strong>
-                {getIcon(post.category)} {post.title} (
-                {categories.find((cat) => cat.name === post.category)?.name || 'Unknown'})
-              </strong>
-              <p>{post.content.substring(0, 40)}...</p>
-              {/* Display images if any */}
-              {post.images && post.images.length > 0 && (
-                <div>
-                  {post.images.map((imageUrl, index) => (
-                    <img
-                      key={index}
-                      src={imageUrl}
-                      alt="Post image"
-                      style={{ width: '50px', height: '50px', marginRight: '5px' }}
-                    />
-                  ))}
-                </div>
-              )}
-              <Button type="link" danger onClick={() => handleDeletePost(post.id)}>
-                Delete
-              </Button>
-            </li>
-          ))}
-        </ul>
-      </section>
+  <ul className="post-list">
+    {filteredPosts.map((post) => (
+      <li key={post.id}>
+        <strong>
+          {getIcon(post.category)} {post.title} (
+          {categories.find((cat) => cat.name === post.category)?.name || 'Unknown'})
+        </strong>
+        <p>{post.content.substring(0, 40)}...</p>
+        {post.images && post.images.length > 0 && (
+          <div>
+            {post.images.map((imageUrl, index) => (
+              <img
+                key={index}
+                src={imageUrl}
+                alt="Post image"
+                style={{ width: '50px', height: '50px', marginRight: '5px' }}
+              />
+            ))}
+          </div>
+        )}
+        <Button type="link" danger onClick={() => handleDeletePost(post.id)}>
+          Delete
+        </Button>
+      </li>
+    ))}
+  </ul>
+</section>
     </div>
   );
 } 
