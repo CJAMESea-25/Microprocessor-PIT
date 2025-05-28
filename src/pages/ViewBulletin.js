@@ -3,52 +3,68 @@ import logo from '../assets/BayadBoardLogo.png';
 import '../styles/ViewBulletin.css';
 import React, { useState, useEffect } from 'react';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
-import { db } from '../firebase'; 
+import { db } from '../firebase';
 
 const ViewBulletin = () => {
-  const [allPosts, setAllPosts] = useState([]);
-  const [emergencyAlerts, setEmergencyAlerts] = useState([]);
-  const [generalAnnouncements, setGeneralAnnouncements] = useState([]);
+  const [posts, setPosts] = useState([]);
+  const [imageUrls, setImageUrls] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [imageUrls, setImageUrls] = useState([]);
 
-  // Fetch posts from Firestore
+  // Fetch categories from Firestore in real-time
+  useEffect(() => {
+    console.log("useEffect: Setting up Firestore listener for categories...");
+    const unsubscribe = onSnapshot(collection(db, 'categories'), (snapshot) => {
+      const fetchedCategories = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        name: doc.data().name,
+      }));
+      console.log('Fetched categories:', fetchedCategories);
+      setCategories(fetchedCategories);
+      if (!fetchedCategories.length) {
+        console.log('No categories found in Firestore. Using defaults.');
+        setCategories([
+          { id: 'cat1', name: 'Emergency Alerts' },
+          { id: 'cat2', name: 'General Announcements' },
+          { id: 'cat3', name: 'Community News' },
+          { id: 'cat4', name: 'Reminders or Notices' },
+        ]);
+      }
+    }, (error) => {
+      console.error('Error fetching categories:', error.message, 'Code:', error.code);
+      setError('Failed to load categories: ' + error.message);
+      setCategories([
+        { id: 'cat1', name: 'Emergency Alerts' },
+        { id: 'cat2', name: 'General Announcements' },
+        { id: 'cat3', name: 'Community News' },
+        { id: 'cat4', name: 'Reminders or Notices' },
+      ]);
+    });
+
+    return () => {
+      console.log("useEffect cleanup: Unsubscribing from Firestore categories listener.");
+      unsubscribe();
+    };
+  }, []);
+
+  // Fetch posts from Firestore in real-time
   useEffect(() => {
     console.log("useEffect: Setting up Firestore listener for posts...");
     const postsCollectionRef = collection(db, 'posts');
-    const q = query(postsCollectionRef, orderBy('timestamp', 'desc'));
+    const postsQuery = query(postsCollectionRef, orderBy('timestamp', 'desc'));
 
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      console.log("onSnapshot: Data received from Firestore!");
-      console.log("Query Snapshot:", querySnapshot);
-
-      const fetchedPosts = [];
-      if (querySnapshot && querySnapshot.docs) {
-        querySnapshot.docs.forEach((doc) => {
-          console.log("  Document ID:", doc.id, "Data:", doc.data());
-          fetchedPosts.push({ id: doc.id, ...doc.data() });
-        });
-      } else {
-        console.log("Query Snapshot has no 'docs' property or is null/undefined.");
-      }
-
-      console.log("Fetched Posts Array (before filtering):", fetchedPosts);
-
-      const alerts = fetchedPosts.filter(post => post.category === 'Emergency Alerts');
-      const announcements = fetchedPosts.filter(post => post.category === 'General Announcements');
-
-      console.log("Filtered Emergency Alerts:", alerts);
-      console.log("Filtered General Announcements:", announcements);
-
-      setAllPosts(fetchedPosts);
-      setEmergencyAlerts(alerts);
-      setGeneralAnnouncements(announcements);
-      setLoading(false);
-      console.log("State updated. Loading set to false.");
-    }, (err) => {
-      console.error("onSnapshot: Error fetching posts:", err);
-      setError("Failed to load posts. Please check your internet connection or try again later.");
+    const unsubscribe = onSnapshot(postsCollectionRef, (snapshot) => {
+      const fetchedPosts = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      console.log('Fetched posts:', fetchedPosts);
+      setPosts(fetchedPosts);
+      setLoading(false); // Set loading to false after posts are fetched
+    }, (error) => {
+      console.error('Error fetching posts:', error.message, 'Code:', error.code);
+      setError('Failed to load posts: ' + error.message);
       setLoading(false);
     });
 
@@ -58,28 +74,22 @@ const ViewBulletin = () => {
     };
   }, []);
 
-  // Fetch images from Firestore
+  // Fetch image URLs from Firestore in real-time
   useEffect(() => {
     console.log("useEffect: Setting up Firestore listener for imageUrls...");
     const imageUrlsCollectionRef = collection(db, 'imageUrls');
-    const q = query(imageUrlsCollectionRef);
+    const imagesQuery = query(imageUrlsCollectionRef);
 
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      console.log("onSnapshot: Image URLs received from Firestore!");
-      const fetchedImageUrls = [];
-      if (querySnapshot && querySnapshot.docs) {
-        querySnapshot.docs.forEach((doc) => {
-          console.log("  Image Document ID:", doc.id, "Data:", doc.data());
-          fetchedImageUrls.push({ id: doc.id, ...doc.data() });
-        });
-      } else {
-        console.log("Query Snapshot for imageUrls has no 'docs' or is null/undefined.");
-      }
-      console.log("Fetched Image URLs:", fetchedImageUrls);
+    const unsubscribe = onSnapshot(imageUrlsCollectionRef, (snapshot) => {
+      const fetchedImageUrls = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      console.log('Fetched imageUrls:', fetchedImageUrls);
       setImageUrls(fetchedImageUrls);
-    }, (err) => {
-      console.error("onSnapshot: Error fetching imageUrls:", err);
-      setError("Failed to load images. Please check your internet connection or try again later.");
+    }, (error) => {
+      console.error('Error fetching imageUrls:', error.message, 'Code:', error.code);
+      setError('Failed to load images: ' + error.message);
     });
 
     return () => {
@@ -88,10 +98,30 @@ const ViewBulletin = () => {
     };
   }, []);
 
+  // Merge posts with their images
+  const postsWithImages = posts.map((post) => ({
+    ...post,
+    images: imageUrls
+      .filter((imageUrl) => imageUrl.postId === post.id)
+      .map((img) => img.imageUrl),
+  }));
+
+  // Function to get category-specific icons (imitating Dashboard.js)
+  const getIcon = (cat) => {
+    if (!cat) return '📌';
+    if (cat.includes('Emergency Alerts')) return '🚨';
+    if (cat.includes('General Announcements')) return '📢';
+    if (cat.includes('Community News')) return '📰';
+    if (cat.includes('Reminders or Notices')) return '📝';
+    return '📌';
+  };
+
   const renderPostContent = (post) => {
     return (
       <>
-        <h4>{post.title || 'No Title'}</h4>
+        <h4>
+          {getIcon(post.category)} {post.title || 'No Title'}
+        </h4>
         <p className="posted-date">
           Posted on {post.timestamp ? new Date(post.timestamp).toLocaleString('en-US', {
             year: 'numeric',
@@ -105,7 +135,20 @@ const ViewBulletin = () => {
         <p className="post-main-content">
           {post.content || post.description || 'No content provided.'}
         </p>
-        {post.imageUrl && <img src={post.imageUrl} alt={post.title || "Post image"} className="post-image" />}
+        {/* Display images if any, imitating Dashboard.js */}
+        {post.images && post.images.length > 0 && (
+          <div className="post-images">
+            {post.images.map((imageUrl, index) => (
+              <img
+                key={index}
+                src={imageUrl}
+                alt={`Post image ${index + 1}`}
+                className="post-image"
+              />
+            ))}
+          </div>
+        )}
+        {post.author && <small className="post-author">By: {post.author}</small>}
       </>
     );
   };
@@ -180,53 +223,30 @@ const ViewBulletin = () => {
       </header>
 
       <div className="content-container">
-        {/* Image Gallery */}
-        <section className="image-gallery-section">
-          <h3>Image Gallery 🖼️</h3>
-          <div className="image-grid">
-            {imageUrls.length === 0 ? (
-              <p className="no-posts-message">No images available.</p>
-            ) : (
-              imageUrls.map((image) => (
-                <div key={image.id} className="image-box">
-                  <img src={image.url} alt="Gallery image" className="gallery-image" />
-                </div>
-              ))
-            )}
-          </div>
-        </section>
+        {/* Dynamic sections for each category */}
+        {categories.map((category) => {
+          const categoryPosts = postsWithImages.filter((post) => post.category === category.name);
+          if (categoryPosts.length === 0) return null;
 
-        {/* Emergency Alerts */}
-        <section className="alerts-section">
-          <h3>Emergency Alerts 📛</h3>
-          <div className="emergency-grid">
-            {emergencyAlerts.length === 0 ? (
-              <p className="no-posts-message">No emergency alerts currently.</p>
-            ) : (
-              emergencyAlerts.map((alert) => (
-                <div key={alert.id} className="alert-box">
-                  {renderPostContent(alert)}
-                </div>
-              ))
-            )}
-          </div>
-        </section>
-
-        {/* General Announcements */}
-        <section className="announcements-section">
-          <h3>General Announcements 📢</h3>
-          <div className="announcement-grid">
-            {generalAnnouncements.length === 0 ? (
-              <p className="no-posts-message">No general announcements currently.</p>
-            ) : (
-              generalAnnouncements.map((announcement) => (
-                <div key={announcement.id} className="announcement-card">
-                  {renderPostContent(announcement)}
-                </div>
-              ))
-            )}
-          </div>
-        </section>
+          return (
+            <section key={category.id} className="category-section">
+              <h3>
+                {getIcon(category.name)} {category.name}
+              </h3>
+              <div className={`category-grid category-${category.id}`}>
+                {categoryPosts.length === 0 ? (
+                  <p className="no-posts-message">No posts in this category currently.</p>
+                ) : (
+                  categoryPosts.map((post) => (
+                    <div key={post.id} className="post-box">
+                      {renderPostContent(post)}
+                    </div>
+                  ))
+                )}
+              </div>
+            </section>
+          );
+        })}
       </div>
     </div>
   );
