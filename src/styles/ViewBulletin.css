@@ -1,11 +1,12 @@
 /* Global Container */
-.board-container {
+.board-container
+ {
   background: white;
   color: black;
-  padding: 2rem;
   max-width: 1200px;
   width: 100%;
   margin: auto;
+  min-height: 100vh; /* Ensure the container spans the viewport height */
 }
 
 /* Header */
@@ -18,18 +19,16 @@
 header .logo {
   display: flex;
   align-items: center;
+
 }
 
-header .logo img 
+header .logo-section img 
 {
   width: 50px;
   height: auto;
+  margin-top: -20px;
 }
 
-.logo h1 {
-  font-size: 32px;
-  font-weight: bold;
-}
 
 .back-button 
 {
@@ -43,15 +42,16 @@ header .logo img
 
 /* Title */
 
-.title-bar
- {
-  display: flex;                
-  align-items: center;          
+/* Title Bar */
+.title-bar 
+{
+  max-width: 1200px; /* Match board-container width */
+  width: 100%;
+  display: flex;
+  align-items: center;
   justify-content: space-between;
-  margin-top: 0rem;             
-  margin-bottom: 2rem;   
-  /*border-bottom: 1px solid #aaa; */
- /* padding-bottom: 1rem;     */ 
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
 
 .main-title 
@@ -84,33 +84,22 @@ font-size: 1.5rem;
 }
 .alert-box
 {
-  border: 1px solid #aaa;
-  padding: 5rem;
+  background: #f9f9f9;
+  border: 2px solid black;
+  padding: 2rem;
   border-radius: 12px;
-  max-width: 600px;
-  background-color: #f9f9f9;
   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.05);
+  text-align: justify;
+  
 }
 
 .alert-box h4 
 {
   font-weight: bold;
-  font-size: 1.3rem;
+  font-size: 1.7rem;
   text-align: center;
-
   color:#000000;
 
-}
-.alert-box p 
-{
-  font-size: 1rem;       /* Example: set a specific font size */
-  line-height: 1.5;      /* Example: adjust line spacing */
-  color: #333;           /* Example: set a specific color */
-  margin-top: 1rem;      /* Example: add space above the paragraph */
-  margin-bottom: 0;      /* Example: remove space below the last paragraph */
-  /* You can remove text-align: center; from .alert-box h4 or .posted-date if it's currently affecting this p */
-  /* If you want this paragraph left-aligned, you might need to ensure no parent is centering text */
-  text-align: left; /* Example: explicitly left-align the text if a parent is centering it */
 }
 .posted-date
  {
@@ -119,13 +108,25 @@ font-size: 1.5rem;
   color: gray;
   margin-bottom: 0.5rem;
   text-align: center;
+
 }
 
 /* Announcements */
 .announcements-section
 {
   margin-top: 3rem;
+
 }
+.announcements-section h3{
+font-size: 1.5rem;
+  font-weight: bold;
+  color: #000;
+  margin-top:0;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #aaa;
+  padding-bottom: 0.5rem;
+}
+
 
 .announcement-grid 
 {
@@ -137,10 +138,11 @@ font-size: 1.5rem;
 .announcement-card 
 {
   background: #f9f9f9;
-  border: 1px solid #aaa;
-  padding: 5rem;
+  border: 2px solid black;
+  padding: 2rem;
   border-radius: 12px;
   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.05);
+  text-align: justify;
 }
 
 .announcement-card h4
@@ -158,6 +160,7 @@ font-size: 1.5rem;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+
 }
 
 /* Logo styling */
@@ -168,10 +171,79 @@ font-size: 1.5rem;
 }
 
 .logo h1 {
-  font-size: 32px;
-  font-weight: bold;
+  font-size: 55px;
+  font-weight: 400;
   margin: 0;
 }
 
+
+
+/* firebase add */
+.loading-message,
+.error-message,
+.no-posts-message {
+    text-align: center;
+    padding: 20px;
+    font-size: 1.1em;
+    color: #666;
+}
+
+.error-message {
+    color: #d9534f; /* Red for errors */
+    font-weight: bold;
+}
+
+/* Styles for dynamic post cards if you don't have them yet */
+
+
+
+.posted-date {
+    font-size: 0.85em;
+    color: #888;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+.post-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    margin-top: 20px;
+    margin-bottom: 5px;
+}
+
+.post-main-content
+ {
+    font-size: 0.9em;
+    line-height: 1.5;
+    color: #555;
+    margin-top: 20px;
+
+}
+
+
+.content-container 
+{
+  padding-top: 180px; 
+  overflow-y: auto; 
+  height: calc(100vh - 180px); 
+  padding-bottom: 2rem; 
+  padding-top: 2rem;  
+}
+
+
+/* For the announcement-grid, ensure it's a grid */
+.announcement-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    padding: 10px 0;
+}
+.emergency-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    padding: 10px 0;
+}
 
 
