@@ -91,6 +91,7 @@ select.field-input {
   display: flex;
   justify-content: flex-end;
   margin-top: 2rem;
+
 }
 
 .update-btn {
@@ -98,8 +99,8 @@ select.field-input {
   font-weight: bold;
   background-color: #0066FF;
   color: white;
-  padding: 1rem 3rem;
+  padding: 1rem 3rem;   
   border: none;
-  border-radius: 20px;
+  border-radius: 40px;
   cursor: pointer;
 }

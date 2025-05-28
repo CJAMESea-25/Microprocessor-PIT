@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import '../styles/EditPost.css';
 
 export default function EditPost({ post, onClose, onSave }) {

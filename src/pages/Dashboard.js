@@ -48,6 +48,7 @@ export default function Dashboard() {
   const [previewImage, setPreviewImage] = useState('');
   const [fileList, setFileList] = useState([]);
   const [posts, setPosts] = useState([]);
+  const [imageUrls, setImageUrls] = useState([]); 
   const [categories, setCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [form] = Form.useForm();
@@ -74,10 +75,10 @@ export default function Dashboard() {
       console.error('Error fetching categories:', error.message, 'Code:', error.code);
       message.error('Failed to load categories. Using defaults.');
       setCategories([
-          { id: 'cat1', name: 'Emergency Alerts' },
-          { id: 'cat3', name: 'General Announcements' },
-          { id: 'cat4', name: 'Community News' },
-          { id: 'cat5', name: 'Reminders or Notices' },
+        { id: 'cat1', name: 'Emergency Alerts' },
+        { id: 'cat3', name: 'General Announcements' },
+        { id: 'cat4', name: 'Community News' },
+        { id: 'cat5', name: 'Reminders or Notices' },
       ]);
     });
     return () => unsubscribe();
@@ -95,6 +96,22 @@ export default function Dashboard() {
     }, (error) => {
       console.error('Error fetching posts:', error.message, 'Code:', error.code);
       message.error('Failed to load posts');
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Fetch image URLs from Firestore in real-time
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'imageUrls'), (snapshot) => {
+      const fetchedImageUrls = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      console.log('Fetched imageUrls:', fetchedImageUrls);
+      setImageUrls(fetchedImageUrls);
+    }, (error) => {
+      console.error('Error fetching imageUrls:', error.message, 'Code:', error.code);
+      message.error('Failed to load imageUrls');
     });
     return () => unsubscribe();
   }, []);
@@ -135,26 +152,36 @@ export default function Dashboard() {
     }
 
     try {
-      // Convert all images to Base64 (if any)
-      const imageUrls = fileList.length > 0 ? await Promise.all(fileList.map((file) => 
-        getBase64(file.originFileObj))) : [];
-      console.log('Images converted to Base64:', imageUrls);
-
-      // Save post to Firestore with specified sequence
+      // Save post to Firestore first
       const categoryName = categories.find((cat) => cat.id === values.category)?.name || '';
       const newPost = {
         category: categoryName,
         title: values.title,
         content: values.description,
-        imageUrl: imageUrls,
         timestamp: new Date().toISOString(),
       };
 
       console.log('Saving post to Firestore:', newPost);
-      const docRef = await addDoc(collection(db, 'posts'), newPost).catch((error) => {
+      const postRef = await addDoc(collection(db, 'posts'), newPost).catch((error) => {
         throw new Error(`Firestore write failed: ${error.message}`);
       });
-      console.log('Post saved successfully with ID:', docRef.id);
+      console.log('Post saved successfully with ID:', postRef.id);
+
+      // Convert all images to Base64 and save to 'imageUrls' collection
+      if (fileList.length > 0) {
+        const imageUrlPromises = fileList.map(async (file) => {
+          const base64Image = await getBase64(file.originFileObj);
+          const imageUrlDoc = {
+            postId: postRef.id,
+            imageUrl: base64Image,
+            timestamp: new Date().toISOString(),
+          };
+          return addDoc(collection(db, 'imageUrls'), imageUrlDoc);
+        });
+
+        await Promise.all(imageUrlPromises);
+        console.log('Image URLs saved successfully for post ID:', postRef.id);
+      }
 
       form.resetFields();
       setFileList([]);
@@ -167,17 +194,31 @@ export default function Dashboard() {
 
   const handleDeletePost = async (postId) => {
     try {
+      // Delete the post
       await deleteDoc(doc(db, 'posts', postId));
-      message.success('Post deleted successfully');
+
+      // Delete associated image URLs
+      const imageUrlsToDelete = imageUrls.filter((imageUrl) => imageUrl.postId === postId);
+      const deleteImageUrlPromises = imageUrlsToDelete.map((imageUrl) =>
+        deleteDoc(doc(db, 'imageUrls', imageUrl.id))
+      );
+      await Promise.all(deleteImageUrlPromises);
+
+      message.success('Post and associated image URLs deleted successfully');
     } catch (error) {
       console.error('Error deleting post:', error.message, 'Code:', error.code);
       message.error('Failed to delete post');
     }
   };
 
-  const filteredPosts = posts.filter((post) =>
-    post?.title ? post.title.toLowerCase().includes(searchTerm.toLowerCase()) : false
-  );
+  const filteredPosts = posts
+    .filter((post) =>
+      post?.title ? post.title.toLowerCase().includes(searchTerm.toLowerCase()) : false
+    )
+    .map((post) => ({
+      ...post,
+      images: imageUrls.filter((imageUrl) => imageUrl.postId === post.id).map((img) => img.imageUrl),
+    }));
 
   const uploadButton = (
     <button style={{ border: 0, background: 'none' }} type="button">
@@ -205,9 +246,11 @@ export default function Dashboard() {
 
       <main className="main-content">
         <div className="container">
-          <section className="form-section">
-            <h2>DASHBOARD</h2>
+            <h1>DASHBOARD</h1>
+
+            <div className="post">
             <h2>📝 Create New Post</h2>
+
             <p>Fill out the form below to publish a new bulletin post. All posts will be displayed
               on the public board after submission. Photo upload is optional.</p>
 
@@ -271,7 +314,7 @@ export default function Dashboard() {
                 <SubmitButton form={form} />
               </Form.Item>
             </Form>
-          </section>
+                    </div>
         </div>
       </main>
 
@@ -293,10 +336,23 @@ export default function Dashboard() {
           {filteredPosts.map((post) => (
             <li key={post.id}>
               <strong>
-                {post.icon || '📌'} {post.title} (
+                {getIcon(post.category)} {post.title} (
                 {categories.find((cat) => cat.name === post.category)?.name || 'Unknown'})
               </strong>
               <p>{post.content.substring(0, 40)}...</p>
+              {/* Display images if any */}
+              {post.images && post.images.length > 0 && (
+                <div>
+                  {post.images.map((imageUrl, index) => (
+                    <img
+                      key={index}
+                      src={imageUrl}
+                      alt="Post image"
+                      style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                    />
+                  ))}
+                </div>
+              )}
               <Button type="link" danger onClick={() => handleDeletePost(post.id)}>
                 Delete
               </Button>
@@ -306,4 +362,4 @@ export default function Dashboard() {
       </section>
     </div>
   );
-}
+} 
