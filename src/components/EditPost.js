@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { collection, onSnapshot, doc, updateDoc, addDoc, deleteDoc } from 'firebase/firestore';
 import { message, Upload, Button } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
-import { db } from '../firebase'; // Ensure this path matches your project structure
+import { db } from '../firebase';
 import '../styles/EditPost.css';
 
 const getBase64 = (file) =>
@@ -30,6 +30,13 @@ export default function EditPost({ post, onClose, onSave }) {
       setCategories(fetchedCategories);
       if (!fetchedCategories.length) {
         message.warning('No categories found in Firestore.');
+        setCategories([
+          { id: 'cat1', name: 'Emergency Alerts' },
+          { id: 'cat2', name: 'General Announcements' },
+          { id: 'cat3', name: 'Community News' },
+          { id: 'cat4', name: 'Reminders or Notices' },
+          { id: 'cat5', name: 'Community Events' },
+        ]);
       }
     }, (error) => {
       console.error('Error fetching categories:', error.message, 'Code:', error.code);
@@ -48,26 +55,24 @@ export default function EditPost({ post, onClose, onSave }) {
           uid: doc.id, // For Upload component
           name: `image-${doc.id}.png`, // Placeholder name
           status: 'done',
-          url: doc.data().imageUrl,
+          url: doc.data().url, // Fixed: Use 'url' instead of 'imageUrl'
         }));
 
       console.log('Fetched imageUrls for post:', fetchedImageUrls);
 
       // Merge fetched images with locally added (but not yet saved) images
       setFileList((prevFileList) => {
-        // Keep locally added images (those without an id)
         const localImages = prevFileList.filter((file) => !file.id);
-        // Combine with fetched images, avoiding duplicates by uid
         const updatedFileList = [
           ...fetchedImageUrls,
-          ...localImages.filter((localFile) =>
-            !fetchedImageUrls.some((fetchedFile) => fetchedFile.uid === localFile.uid)
+          ...localImages.filter(
+            (localFile) => !fetchedImageUrls.some((fetchedFile) => fetchedFile.uid === localFile.uid)
           ),
         ];
         return updatedFileList;
       });
 
-      setImageUrls(fetchedImageUrls.map((img) => ({ id: img.id, imageUrl: img.url })));
+      setImageUrls(fetchedImageUrls.map((img) => ({ id: img.id, url: img.url })));
     }, (error) => {
       console.error('Error fetching imageUrls:', error.message, 'Code:', error.code);
       message.error('Failed to load images.');
@@ -83,7 +88,6 @@ export default function EditPost({ post, onClose, onSave }) {
   const handleUploadChange = async ({ fileList: newFileList }) => {
     console.log('Updated fileList:', newFileList);
 
-    // Generate Base64 preview for new uploads
     const updatedFileList = await Promise.all(
       newFileList.map(async (file) => {
         if (file.originFileObj && !file.url && !file.preview) {
@@ -100,12 +104,11 @@ export default function EditPost({ post, onClose, onSave }) {
   const handleRemove = async (file) => {
     try {
       if (file.id) {
-        // Delete from Firestore if the image exists in the database
         await deleteDoc(doc(db, 'imageUrls', file.id));
         console.log('Image deleted from Firestore:', file.id);
         message.success('Image deleted successfully');
       }
-      return true; // Allow removal from fileList
+      return true;
     } catch (error) {
       console.error('Error deleting image:', error.message, 'Code:', error.code);
       message.error('Failed to delete image');
@@ -115,33 +118,30 @@ export default function EditPost({ post, onClose, onSave }) {
 
   const handleSave = async () => {
     try {
-      // Validate required fields
       if (!editedPost.category || !editedPost.title || !editedPost.content) {
         message.error('Please fill out all required fields');
         return;
       }
 
-      // Update the post in Firestore
       const postRef = doc(db, 'posts', editedPost.id);
       const updatedPostData = {
         category: editedPost.category,
         title: editedPost.title,
         content: editedPost.content,
         timestamp: new Date().toISOString(),
-        imageUrl: fileList.length > 0 ? [fileList[0].url || fileList[0].preview] : [], // Update first image for compatibility with ManagePosts
       };
       await updateDoc(postRef, updatedPostData);
       console.log('Post updated successfully in Firestore:', editedPost.id);
 
-      // Handle new image uploads
+      // Handle new images
       const newImages = fileList.filter((file) => !file.id && file.originFileObj);
       if (newImages.length > 0) {
         const imageUrlPromises = newImages.map(async (file) => {
           const base64Image = file.url || file.preview || (await getBase64(file.originFileObj));
           const imageUrlDoc = {
             postId: editedPost.id,
-            imageUrl: base64Image,
-            timestamp: new Date().toISOString(),
+            url: base64Image,
+            createdAt: new Date().toISOString(),
           };
           return addDoc(collection(db, 'imageUrls'), imageUrlDoc);
         });
@@ -152,7 +152,7 @@ export default function EditPost({ post, onClose, onSave }) {
       // Call the parent's onSave with updated post data
       onSave({
         ...editedPost,
-        photo: fileList.length > 0 ? fileList[0].url || fileList[0].preview : null,
+        images: fileList.map((file) => file.url || file.preview), // Pass all images
       });
       message.success('Post updated successfully');
       onClose();
@@ -232,7 +232,7 @@ export default function EditPost({ post, onClose, onSave }) {
             <Upload
               listType="picture-card"
               fileList={fileList}
-              beforeUpload={() => false} // Prevent automatic upload, let onChange handle it
+              beforeUpload={() => false}
               onChange={handleUploadChange}
               onRemove={handleRemove}
             >
@@ -241,7 +241,6 @@ export default function EditPost({ post, onClose, onSave }) {
           </div>
         </div>
 
-        {/* Button container aligns button to lower right */}
         <div className="button-container">
           <button className="update-btn" onClick={handleSave}>
             UPDATE
