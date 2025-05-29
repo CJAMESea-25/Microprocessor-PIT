@@ -82,23 +82,20 @@ body {
   padding-bottom: 0.5rem;
 }
 
-.post {
-  background-color: #CCE0FF;
-  font-size: 18px;
-  padding-top: 2rem;
-  padding-bottom: 2rem;
-  padding-left: 2rem;
-  padding-right: 2rem;
+.post-button {
+  border-radius: 30px;
+  width: 20%;
+  height: 50px;
+  background-color: #0066FF;
+  color: black;
+  font-weight: 700;
+  padding: 0 1rem;
   box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  max-width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  overflow-x: hidden;
-  margin-top: -10px;
+  margin-left: auto;
+  display: block;
 }
+
+
 
 .post h2 {
   font-size: 18px;
@@ -147,13 +144,14 @@ body {
 
 .post-button {
   border-radius: 30px;
-  width: 200px;
+  width: 20%;
   height: 50px;
   background-color: #0066FF;
   color: black;
-  font-family: 'Inter', sans-serif;
   font-weight: 700;
-  margin-left: 800px;
+  display: flex;
+  padding: 0 1rem;
+  box-sizing: border-box;
 }
 
 .post-section {
@@ -221,13 +219,10 @@ body {
   width: 50px;
   height: 50px;
   margin: 15px auto;
-  display: inline-flex;
   align-items: center;
-  justify-content: center;
   font-size: 20px;
-  padding: 0;
   line-height: 1;
-  box-shadow: 0 4px 30px black;
+  box-shadow: 0 2px 15px black;
 }
 
 .emergency-btn svg {
@@ -423,4 +418,22 @@ body {
   height: 50px;
   object-fit: cover;
   margin-right: 5px;
+}
+
+@media (max-width: 768px) {
+  .post-button {
+    width: 30%;
+    height: 40px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .post-button {
+    width: 50%;
+    height: 35px;
+    font-size: 0.8rem;
+    margin-left: auto;
+    align-self: flex-end;
+  }
 }
