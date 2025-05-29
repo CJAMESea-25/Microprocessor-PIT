@@ -1,7 +1,7 @@
 import React from 'react';
-import sidebar from '../assets/BayadBoardLogo.png';
 import { useNavigate } from 'react-router-dom';
 import '../styles/AdminViewBulletin.css';
+import Sidebar from '../components/sidebar';
 
 const AdminViewBulletin = () => {
   const navigate = useNavigate();
@@ -35,32 +35,18 @@ const AdminViewBulletin = () => {
 
   return (
     <div className="manage-container">
-      <aside className="sidebar">
-        <div className="sidebar-header">
-          <img src={sidebar} alt="BayanBoard Logo" className="sidebar-logo" />
-          <h2 className="logo-text">BayanBoard</h2>
-        </div>
-        <nav>
-          <ul>
-            <li onClick={() => navigate('/Dashboard')}>Dashboard</li>
-            <li onClick={() => navigate('/manage-posts')}>Manage All Posts</li>
-            <li className="active">View Bulletin</li>
-          </ul>
-        </nav>
-        <a href="/" className="logout">Log Out</a>
-      </aside>
-
+      <Sidebar activePage="View Bulletin" />
       <main className="view-main-content">
         <div className="view-bulletin">
           <h1>VIEW BULLETIN BOARD</h1>
-            {dummyPosts.map(post => (
-              <div key={post.id} className="bulletin-posts">
-                        <h3>{post.title}</h3>
-                <p>{post.content}</p>
-                <span className="post-date">{post.date}</span>
-              </div>
-            ))}
-          </div>
+          {dummyPosts.map(post => (
+            <div key={post.id} className="bulletin-posts">
+              <h3>{post.title}</h3>
+              <p>{post.content}</p>
+              <span className="post-date">{post.date}</span>
+            </div>
+          ))}
+        </div>
       </main>
     </div>
   );

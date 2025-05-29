@@ -8,75 +8,13 @@ body {
   min-height: 90vh;
 }
 
-.sidebar {
-  width: 250px;
-  height: 900px;
-  background-color: white;  
-  color: #2c3e50;           
-  padding: 2rem 1rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.sidebar-header {
-  display: flex;
-  align-items: center; 
-  gap: 10px;
-  margin-bottom: 2rem;
-}
-
-.sidebar-logo {
-  width: 40px;
-  height: auto;
-  display: block; 
-  margin-top: 50px;
-  margin-left: 20px;
-}
-
-.logo-text {
-  color: black;
-  font-weight: 200;
-  margin-top: 65px;        
-  line-height: 1;   
-  font-size: 50px;
-  font-family: 'Jomhuria', cursive;
-}
-
-.sidebar nav ul {
-  list-style: none;
-  padding: 0;
-}
-
-.sidebar nav li {
-  padding: 0.75rem 1rem;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: background 0.3s;
-  color: #2c3e50;
-}
-
-.sidebar nav li:hover,
-.sidebar nav .active {
-  background-color: #d0e7ff; 
-}
-
-.sidebar .logout {
-  text-align: center;
-  color: #2c3e50;
-  text-decoration: underline;
-  font-weight: bold;
-  margin-top: 2rem;
-  display: block;
-}
-
 .main-content {
   flex-grow: 1;
   padding: 2rem;
 }
 
 .container {
-  background-color: #CCE0FF; 
+  background-color: #CCE0FF;
   font-size: 20px;
   border-radius: 10px;
   padding: 6rem;
@@ -85,12 +23,10 @@ body {
   flex-direction: column;
   gap: 1.5rem;
   max-width: 100%;
-  max-height: 80vh;   
-  overflow-y: auto;    
+  max-height: 80vh;
+  overflow-y: auto;
   overflow-x: hidden;
-
 }
-
 
 .container h1 {
   font-size: 50px;
@@ -99,7 +35,7 @@ body {
 }
 
 .post {
-  background-color: #CCE0FF; 
+  background-color: #CCE0FF;
   font-size: 20px;
   border-radius: 10px;
   padding: 6rem;
@@ -108,19 +44,15 @@ body {
   flex-direction: column;
   gap: 1.5rem;
   max-width: 100%;
-  max-height: 80vh;   
-  overflow-y: auto;    
+  max-height: 80vh;
+  overflow-y: auto;
   overflow-x: hidden;
-
 }
-
 
 .post h2 {
   font-size: 50px;
   font-family: 'Inter', sans-serif;
   font-weight: bolder;
-  
-  
 }
 
 .main-content h1 {
@@ -131,36 +63,34 @@ body {
 .controls {
   display: flex;
   gap: 5rem;
-  align-items: center; 
-  flex-wrap: nowrap; 
+  align-items: center;
+  flex-wrap: nowrap;
 }
 
 .controls input,
 .controls select {
-  padding: 10px; 
+  padding: 10px;
   border: 1px solid #ccc;
   gap: 10rem;
   border-radius: 8px;
-  flex-grow: 0; 
-  min-width: 200px; /* Minimum width for consistency */
+  flex-grow: 0;
+  min-width: 200px;
 }
-
 
 .controls input[type="text"] {
-  width: 300px; /* Adjusted to a reasonable width based on screenshot */
-  height: 40px; /* Adjusted height for better appearance */
-  font-size: 16px; 
+  width: 300px;
+  height: 40px;
+  font-size: 16px;
 }
 
-/* Customize label font and alignment */
 .controls label {
-  display: inline-block; /* Changed to inline-block for horizontal alignment */
-  margin-bottom: 0; /* Remove bottom margin to align with inputs */
-  margin-right: 5px; /* Space between label and input */
-  font-size: 16px; 
-  font-weight: bold; 
-  color: #2c3e50; 
-  vertical-align: middle; /* Align label vertically with input */
+  display: inline-block;
+  margin-bottom: 0;
+  margin-right: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #2c3e50;
+  vertical-align: middle;
 }
 
 .posts-table {

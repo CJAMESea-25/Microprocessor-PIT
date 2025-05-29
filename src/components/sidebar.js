@@ -1,34 +1,39 @@
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import sidebarLogo from '../assets/BayadBoardLogo.png';
+import { useNavigate } from 'react-router-dom';
+import sidebar from '../assets/BayadBoardLogo.png';
 import '../styles/Sidebar.css';
 
-export default function Sidebar() {
+const Sidebar = ({ activePage }) => {
   const navigate = useNavigate();
-  const location = useLocation();
 
-  const isActive = (path) => location.pathname === path;
+  const navItems = [
+    { name: 'Dashboard', path: '/Dashboard' },
+    { name: 'Manage All Posts', path: '/manage-posts' },
+    { name: 'View Bulletin', path: '/admin-view' },
+  ];
 
   return (
     <aside className="sidebar">
       <div className="sidebar-header">
-        <img src={sidebarLogo} alt="BayanBoard Logo" className="sidebar-logo" />
+        <img src={sidebar} alt="BayanBoard Logo" className="sidebar-logo" />
         <h2 className="logo-text">BayanBoard</h2>
       </div>
       <nav>
         <ul>
-          <li className={isActive('/dashboard') ? 'active' : ''} onClick={() => navigate('/dashboard')}>
-            Dashboard
-          </li>
-          <li className={isActive('/manage-post') ? 'active' : ''} onClick={() => navigate('/manage-post')}>
-            Manage All Post
-          </li>
-          <li className={isActive('/view-bulletin') ? 'active' : ''} onClick={() => navigate('/view-bulletin')}>
-            View Bulletin
-          </li>
+          {navItems.map((item) => (
+            <li
+              key={item.name}
+              className={activePage === item.name ? 'active' : ''}
+              onClick={() => navigate(item.path)}
+            >
+              {item.name}
+            </li>
+          ))}
         </ul>
       </nav>
       <a href="/" className="logout">Log Out</a>
     </aside>
   );
-}
+};
+
+export default Sidebar;

@@ -3,9 +3,9 @@ import { Button, Form, Image, Input, Select, Space, Upload, message } from 'antd
 import { addDoc, collection, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import sidebar from '../assets/BayadBoardLogo.png';
 import { db } from '../firebase';
 import '../styles/Dashboard.css';
+import Sidebar from '../components/sidebar';
 
 const { TextArea, Search } = Input;
 const { Option } = Select;
@@ -48,7 +48,7 @@ export default function Dashboard() {
   const [previewImage, setPreviewImage] = useState('');
   const [fileList, setFileList] = useState([]);
   const [posts, setPosts] = useState([]);
-  const [imageUrls, setImageUrls] = useState([]); 
+  const [imageUrls, setImageUrls] = useState([]);
   const [categories, setCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [form] = Form.useForm();
@@ -229,31 +229,14 @@ export default function Dashboard() {
 
   return (
     <div className="manage-container">
-      <aside className="sidebar">
-        <div className="sidebar-header">
-          <img src={sidebar} alt="BayanBoard Logo" className="sidebar-logo" />
-          <h2 className="logo-text">BayanBoard</h2>
-        </div>
-        <nav>
-          <ul>
-            <li className="active">Dashboard</li>
-            <li onClick={() => navigate('/manage-posts')}>Manage All Posts</li>
-            <li onClick={() => navigate('/admin-view')}>View Bulletin</li>
-          </ul>
-        </nav>
-        <a href="/" className="logout">Log Out</a>
-      </aside>
-
+      <Sidebar activePage="Dashboard" />
       <main className="main-content">
         <div className="container">
-            <h1>DASHBOARD</h1>
-
-            <div className="post">
+          <h1>DASHBOARD</h1>
+          <div className="post">
             <h2>📝 Create New Post</h2>
-
             <p>Fill out the form below to publish a new bulletin post. All posts will be displayed
               on the public board after submission. Photo upload is optional.</p>
-
             <Form
               form={form}
               layout="vertical"
@@ -272,21 +255,18 @@ export default function Dashboard() {
                   ))}
                 </Select>
               </Form.Item>
-
               <Form.Item
                 name="title"
                 rules={[{ required: true, message: 'Title is required' }]}
               >
                 <Input placeholder="Title" />
               </Form.Item>
-
               <Form.Item
                 name="description"
                 rules={[{ required: true, message: 'Description is required' }]}
               >
                 <TextArea placeholder="Description..." autoSize={{ minRows: 3, maxRows: 6 }} />
               </Form.Item>
-
               <Form.Item>
                 <Upload
                   listType="picture-circle"
@@ -309,15 +289,13 @@ export default function Dashboard() {
                   />
                 )}
               </Form.Item>
-
               <Form.Item>
                 <SubmitButton form={form} />
               </Form.Item>
             </Form>
-                    </div>
+          </div>
         </div>
       </main>
-
       <section className="post-section">
         <h2>All Posts</h2>
         <p>Click on a post title below to view or edit its full content.</p>
@@ -331,7 +309,6 @@ export default function Dashboard() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </Space>
-
         <ul className="post-list">
           {filteredPosts.map((post) => (
             <li key={post.id}>
@@ -340,7 +317,6 @@ export default function Dashboard() {
                 {categories.find((cat) => cat.name === post.category)?.name || 'Unknown'})
               </strong>
               <p>{post.content.substring(0, 40)}...</p>
-              {/* Display images if any */}
               {post.images && post.images.length > 0 && (
                 <div>
                   {post.images.map((imageUrl, index) => (
@@ -362,4 +338,4 @@ export default function Dashboard() {
       </section>
     </div>
   );
-} 
+}

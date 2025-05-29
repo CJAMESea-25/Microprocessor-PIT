@@ -2,11 +2,11 @@ import { collection, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import sidebar from '../assets/BayadBoardLogo.png';
 import EditPost from '../components/EditPost';
 import PreviewPost from '../components/PreviewPost';
-import { db } from '../firebase'; // Ensure this path is correct
+import { db } from '../firebase'; 
 import '../styles/ManagePosts.css';
+import Sidebar from '../components/sidebar';
 
 const getIcon = (cat) => {
   if (!cat) return '📌';
@@ -133,21 +133,7 @@ export default function ManagePosts() {
 
   return (
     <div className="manage-container">
-      <aside className="sidebar">
-        <div className="sidebar-header">
-          <img src={sidebar} alt="BayanBoard Logo" className="sidebar-logo" />
-          <h2 className="logo-text">BayanBoard</h2>
-        </div>
-        <nav>
-          <ul>
-            <li onClick={() => navigate('/Dashboard')}>Dashboard</li>
-            <li className="active">Manage All Posts</li>
-            <li onClick={() => navigate('/admin-view')}>View Bulletin</li>
-          </ul>
-        </nav>
-        <a href="/" className="logout">Log Out</a>
-      </aside>
-
+      <Sidebar activePage="Manage All Posts" />
       <main className="main-content">
         <div className="container">
           <h1>MANAGE ALL POSTS</h1>
