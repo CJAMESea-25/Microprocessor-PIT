@@ -223,8 +223,8 @@ const [selectedOption, setSelectedOption] = useState(null);
 
   const uploadButton = (
     <button style={{ border: 0, background: 'none' }} type="button">
-      <PlusOutlined />
-      <div style={{ marginTop: 8 }}>Upload</div>
+      
+      <div style={{ marginTop: 8 }}>Upload Image</div>
     </button>
   );
   const showEmergencyModal = () => {
@@ -268,11 +268,10 @@ const handleEmergencyModalClose = () => {
 
       <main className="main-content">
         <div className="container">
-            <h1>DASHBOARD</h1>
-
+          <h1>DASHBOARD</h1>
             <div className="post">
+            
             <h2>📝 Create New Post</h2>
-
             <p>Fill out the form below to publish a new bulletin post. All posts will be displayed
               on the public board after submission. Photo upload is optional.</p>
 
@@ -284,6 +283,7 @@ const handleEmergencyModalClose = () => {
 >
             <Form.Item
               name="category"
+              style={{ marginBottom: '10px' }}
               rules={[{ required: true, message: 'Category is required' }]}
             >
               <Select className="custom-select" placeholder="Select a category" loading={!categories.length}>
@@ -297,6 +297,7 @@ const handleEmergencyModalClose = () => {
 
   <Form.Item
     name="title"
+    style={{ marginBottom: '10px' }}
     rules={[{ required: true, message: 'Title is required' }]}
   >
     <Input className="custom-title" placeholder="Title" />
@@ -304,6 +305,7 @@ const handleEmergencyModalClose = () => {
 
   <Form.Item
     name="description"
+    style={{ marginBottom: '10px' }}
     rules={[{ required: true, message: 'Description is required' }]}
   >
     <TextArea
@@ -313,30 +315,36 @@ const handleEmergencyModalClose = () => {
     />
   </Form.Item>
 
-  <Form.Item>
-    <Upload
-      listType="picture-circle"
-      fileList={fileList}
-      beforeUpload={() => false}
-      onPreview={handlePreview}
-      onChange={handleChange}
-    >
-      {fileList.length >= 5 ? null : uploadButton}
-    </Upload>
-    {previewImage && (
-      <Image
-        wrapperStyle={{ display: 'none' }}
-        preview={{
-          visible: previewOpen,
-          onVisibleChange: (visible) => setPreviewOpen(visible),
-          afterOpenChange: (visible) => !visible && setPreviewImage(''),
-        }}
-        src={previewImage}
-      />
-    )}
-  </Form.Item>
+  <Form.Item
+    style={{ marginBottom: '15px' }}
+  >
+  <Upload
+    className="custom-upload"
+    listType="picture"
+    fileList={fileList}
+    beforeUpload={() => false}
+    onPreview={handlePreview}
+    onChange={handleChange}
+  >
+    {fileList.length >= 5 ? null : uploadButton}
+  </Upload>
 
-  <Form.Item>
+  {previewImage && (
+    <Image
+      wrapperStyle={{ display: 'none' }}
+      preview={{
+        visible: previewOpen,
+        onVisibleChange: (visible) => setPreviewOpen(visible),
+        afterOpenChange: (visible) => !visible && setPreviewImage(''),
+      }}
+      src={previewImage}
+    />
+  )}
+</Form.Item>
+
+  <Form.Item
+    style={{ marginBottom: '10px' }}
+  >
     <SubmitButton form={form} className="post-button" />
   </Form.Item>
 </Form>
