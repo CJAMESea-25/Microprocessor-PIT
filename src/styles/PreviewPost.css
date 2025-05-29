@@ -40,16 +40,14 @@
   cursor: pointer;
 }
 
-/* Ellipsis Menu Wrapper */
 .ellipsis-menu-wrapper {
   position: absolute;
   top: 12px;
-  right: 55px; /* next to close button */
+  right: 55px; 
   display: inline-block;
   user-select: none;
 }
 
-/* Ellipsis Button */
 .ellipsis-btn {
   font-size: 1.5rem;
   background: none;
@@ -60,7 +58,6 @@
   line-height: 1;
 }
 
-/* Dropdown Menu */
 .ellipsis-dropdown {
   position: absolute;
   top: 24px;
@@ -75,7 +72,6 @@
   flex-direction: column;
 }
 
-/* Dropdown Option Buttons */
 .ellipsis-option {
   background: none;
   border: none;
@@ -92,7 +88,6 @@
   color: white;
 }
 
-/* Delete option style */
 .ellipsis-option.delete {
   color: #cc0000;
 }
@@ -127,4 +122,40 @@
   margin-top: 2rem;
   border-radius: 8px;
   border: 1px solid #ccc;
+}
+
+.preview-images {
+  margin-top: 2rem;
+  max-height: 50vh; 
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.image-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  width: 100%; 
+}
+
+.preview-image {
+  width: 100%; 
+  max-width: 400px; 
+  height: auto; 
+  aspect-ratio: 2 / 1; 
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+@media (min-width: 600px) {
+  .preview-image {
+    width: calc(50% - 0.5rem);
+  }
+}
+
+@media (min-width: 900px) {
+  .preview-image {
+    width: calc(33.333% - 0.666rem);
+  }
 }
