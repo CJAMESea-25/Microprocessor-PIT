@@ -1,13 +1,28 @@
-import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
-import { Button, Form, Image, Input, Select, Space, Upload, message, Modal } from 'antd';
-import { addDoc, collection, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import sidebar from '../assets/BayadBoardLogo.png';
-import { db } from '../firebase';
-import '../styles/Dashboard.css';
-import { FaBell } from 'react-icons/fa';
-
+import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  Button,
+  Form,
+  Image,
+  Input,
+  Select,
+  Space,
+  Upload,
+  message,
+} from "antd";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+} from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import sidebar from "../assets/BayadBoardLogo.png";
+import { db } from "../firebase";
+import "../styles/Dashboard.css";
+import EmergencyModal from "../components/emergencybtn";
+import { FaBell } from "react-icons/fa";
 
 const { TextArea, Search } = Input;
 const { Option } = Select;
@@ -28,17 +43,22 @@ const SubmitButton = ({ form }) => {
     form
       .validateFields({ validateOnly: true })
       .then(() => {
-        console.log('Form validation passed, values:', values);
+        console.log("Form validation passed, values:", values);
         setSubmittable(true);
       })
       .catch((errors) => {
-        console.log('Form validation failed:', errors);
+        console.log("Form validation failed:", errors);
         setSubmittable(false);
       });
   }, [form, values]);
 
   return (
-    <Button className="post-button" type="primary" htmlType="submit" disabled={!submittable}>
+    <Button
+      className="post-button"
+      type="primary"
+      htmlType="submit"
+      disabled={!submittable}
+    >
       ADD POST
     </Button>
   );
@@ -47,73 +67,100 @@ const SubmitButton = ({ form }) => {
 export default function Dashboard() {
   const navigate = useNavigate();
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewImage, setPreviewImage] = useState('');
+  const [previewImage, setPreviewImage] = useState("");
   const [fileList, setFileList] = useState([]);
   const [posts, setPosts] = useState([]);
-  const [imageUrls, setImageUrls] = useState([]); 
+  const [imageUrls, setImageUrls] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [form] = Form.useForm();
-  const [isEmergencyModalVisible, setIsEmergencyModalVisible] = useState(false); // Modal visibility state
-const [selectedOption, setSelectedOption] = useState(null);
+  const [isEmergencyModalVisible, setIsEmergencyModalVisible] = useState(false); // emergency pop-up Modal visibility state
+  const [selectedOption, setSelectedOption] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, 'categories'), (snapshot) => {
-      const fetchedCategories = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        name: doc.data().name,
-      }));
-      console.log('Fetched categories:', fetchedCategories);
-      setCategories(fetchedCategories);
-      if (!fetchedCategories.length) {
-        message.warning('No categories found in Firestore. Using defaults.');
+    const unsubscribe = onSnapshot(
+      collection(db, "categories"),
+      (snapshot) => {
+        const fetchedCategories = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          name: doc.data().name,
+        }));
+        console.log("Fetched categories:", fetchedCategories);
+        setCategories(fetchedCategories);
+        if (!fetchedCategories.length) {
+          message.warning("No categories found in Firestore. Using defaults.");
+          setCategories([
+            { id: "cat1", name: "Emergency Alerts" },
+            { id: "cat3", name: "General Announcements" },
+            { id: "cat4", name: "Community News" },
+            { id: "cat5", name: "Reminders or Notices" },
+          ]);
+        }
+      },
+      (error) => {
+        console.error(
+          "Error fetching categories:",
+          error.message,
+          "Code:",
+          error.code
+        );
+        message.error("Failed to load categories. Using defaults.");
         setCategories([
-          { id: 'cat1', name: 'Emergency Alerts' },
-          { id: 'cat3', name: 'General Announcements' },
-          { id: 'cat4', name: 'Community News' },
-          { id: 'cat5', name: 'Reminders or Notices' },
+          { id: "cat1", name: "Emergency Alerts" },
+          { id: "cat3", name: "General Announcements" },
+          { id: "cat4", name: "Community News" },
+          { id: "cat5", name: "Reminders or Notices" },
         ]);
       }
-    }, (error) => {
-      console.error('Error fetching categories:', error.message, 'Code:', error.code);
-      message.error('Failed to load categories. Using defaults.');
-      setCategories([
-        { id: 'cat1', name: 'Emergency Alerts' },
-        { id: 'cat3', name: 'General Announcements' },
-        { id: 'cat4', name: 'Community News' },
-        { id: 'cat5', name: 'Reminders or Notices' },
-      ]);
-    });
+    );
     return () => unsubscribe();
   }, []);
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, 'posts'), (snapshot) => {
-      const fetchedPosts = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      console.log('Fetched posts:', fetchedPosts);
-      setPosts(fetchedPosts);
-    }, (error) => {
-      console.error('Error fetching posts:', error.message, 'Code:', error.code);
-      message.error('Failed to load posts');
-    });
+    const unsubscribe = onSnapshot(
+      collection(db, "posts"),
+      (snapshot) => {
+        const fetchedPosts = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        console.log("Fetched posts:", fetchedPosts);
+        setPosts(fetchedPosts);
+      },
+      (error) => {
+        console.error(
+          "Error fetching posts:",
+          error.message,
+          "Code:",
+          error.code
+        );
+        message.error("Failed to load posts");
+      }
+    );
     return () => unsubscribe();
   }, []);
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, 'imageUrls'), (snapshot) => {
-      const fetchedImageUrls = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      console.log('Fetched imageUrls:', fetchedImageUrls);
-      setImageUrls(fetchedImageUrls);
-    }, (error) => {
-      console.error('Error fetching imageUrls:', error.message, 'Code:', error.code);
-      message.error('Failed to load imageUrls');
-    });
+    const unsubscribe = onSnapshot(
+      collection(db, "imageUrls"),
+      (snapshot) => {
+        const fetchedImageUrls = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        console.log("Fetched imageUrls:", fetchedImageUrls);
+        setImageUrls(fetchedImageUrls);
+      },
+      (error) => {
+        console.error(
+          "Error fetching imageUrls:",
+          error.message,
+          "Code:",
+          error.code
+        );
+        message.error("Failed to load imageUrls");
+      }
+    );
     return () => unsubscribe();
   }, []);
 
@@ -125,36 +172,42 @@ const [selectedOption, setSelectedOption] = useState(null);
       setPreviewImage(file.url || file.preview);
       setPreviewOpen(true);
     } catch (error) {
-      console.error('Error previewing image:', error);
-      message.error('Failed to preview image');
+      console.error("Error previewing image:", error);
+      message.error("Failed to preview image");
     }
   };
 
   const handleChange = ({ fileList: newFileList }) => {
-    console.log('Updated fileList:', newFileList);
+    console.log("Updated fileList:", newFileList);
     setFileList(newFileList);
   };
 
   const getIcon = (cat) => {
-    if (!cat) return '📌';
-    if (cat.includes('Emergency Alerts')) return '🚨';
-    if (cat.includes('General Announcements')) return '📢';
-    if (cat.includes('Community Events')) return '📅';
-    if (cat.includes('Reminders or Notices')) return '📝';
-    return '📌';
+    if (!cat) return "📌";
+    if (cat.includes("Emergency Alerts")) return "🚨";
+    if (cat.includes("General Announcements")) return "📢";
+    if (cat.includes("Community Events")) return "📅";
+    if (cat.includes("Reminders or Notices")) return "📝";
+    return "📌";
   };
 
   const handleAddPost = async (values) => {
-    console.log('handleAddPost called with values:', values, 'fileList:', fileList);
+    console.log(
+      "handleAddPost called with values:",
+      values,
+      "fileList:",
+      fileList
+    );
     if (!values.category || !values.title || !values.description) {
-      console.log('Validation failed: Missing fields');
-      message.error('Please fill out all required fields');
+      console.log("Validation failed: Missing fields");
+      message.error("Please fill out all required fields");
       return;
     }
 
     try {
       // Save post to Firestore first
-      const categoryName = categories.find((cat) => cat.id === values.category)?.name || '';
+      const categoryName =
+        categories.find((cat) => cat.id === values.category)?.name || "";
       const newPost = {
         category: categoryName,
         title: values.title,
@@ -162,11 +215,13 @@ const [selectedOption, setSelectedOption] = useState(null);
         timestamp: new Date().toISOString(),
       };
 
-      console.log('Saving post to Firestore:', newPost);
-      const postRef = await addDoc(collection(db, 'posts'), newPost).catch((error) => {
-        throw new Error(`Firestore write failed: ${error.message}`);
-      });
-      console.log('Post saved successfully with ID:', postRef.id);
+      console.log("Saving post to Firestore:", newPost);
+      const postRef = await addDoc(collection(db, "posts"), newPost).catch(
+        (error) => {
+          throw new Error(`Firestore write failed: ${error.message}`);
+        }
+      );
+      console.log("Post saved successfully with ID:", postRef.id);
 
       // Convert all images to Base64 and save to 'imageUrls' collection
       if (fileList.length > 0) {
@@ -177,18 +232,18 @@ const [selectedOption, setSelectedOption] = useState(null);
             imageUrl: base64Image,
             timestamp: new Date().toISOString(),
           };
-          return addDoc(collection(db, 'imageUrls'), imageUrlDoc);
+          return addDoc(collection(db, "imageUrls"), imageUrlDoc);
         });
 
         await Promise.all(imageUrlPromises);
-        console.log('Image URLs saved successfully for post ID:', postRef.id);
+        console.log("Image URLs saved successfully for post ID:", postRef.id);
       }
 
       form.resetFields();
       setFileList([]);
-      message.success('Post added successfully');
+      message.success("Post added successfully");
     } catch (error) {
-      console.error('Error adding post:', error.message, 'Code:', error.code);
+      console.error("Error adding post:", error.message, "Code:", error.code);
       message.error(`Failed to add post: ${error.message}`);
     }
   };
@@ -196,57 +251,53 @@ const [selectedOption, setSelectedOption] = useState(null);
   const handleDeletePost = async (postId) => {
     try {
       // Delete the post
-      await deleteDoc(doc(db, 'posts', postId));
+      await deleteDoc(doc(db, "posts", postId));
 
       // Delete associated image URLs
-      const imageUrlsToDelete = imageUrls.filter((imageUrl) => imageUrl.postId === postId);
+      const imageUrlsToDelete = imageUrls.filter(
+        (imageUrl) => imageUrl.postId === postId
+      );
       const deleteImageUrlPromises = imageUrlsToDelete.map((imageUrl) =>
-        deleteDoc(doc(db, 'imageUrls', imageUrl.id))
+        deleteDoc(doc(db, "imageUrls", imageUrl.id))
       );
       await Promise.all(deleteImageUrlPromises);
 
-      message.success('Post and associated image URLs deleted successfully');
+      message.success("Post and associated image URLs deleted successfully");
     } catch (error) {
-      console.error('Error deleting post:', error.message, 'Code:', error.code);
-      message.error('Failed to delete post');
+      console.error("Error deleting post:", error.message, "Code:", error.code);
+      message.error("Failed to delete post");
     }
   };
 
   const filteredPosts = posts
     .filter((post) =>
-      post?.title ? post.title.toLowerCase().includes(searchTerm.toLowerCase()) : false
+      post?.title
+        ? post.title.toLowerCase().includes(searchTerm.toLowerCase())
+        : false
     )
     .map((post) => ({
       ...post,
-      images: imageUrls.filter((imageUrl) => imageUrl.postId === post.id).map((img) => img.imageUrl),
+      images: imageUrls
+        .filter((imageUrl) => imageUrl.postId === post.id)
+        .map((img) => img.imageUrl),
     }));
 
   const uploadButton = (
-    <button style={{ border: 0, background: 'none' }} type="button">
+    <button style={{ border: 0, background: "none" }} type="button">
       <PlusOutlined />
       <div style={{ marginTop: 8 }}>Upload</div>
     </button>
   );
+
   const showEmergencyModal = () => {
-  setIsEmergencyModalVisible(true);
-  setSelectedOption(null);
-};
-const handleEmergencySelect = (option) => {
-  setSelectedOption(option);
-
-  if (option === 'red') {
-    message.warning('🚨 Red Warning: Immediate action required!');
-  } else if (option === 'yellow') {
-    message.info('⚠️ Yellow Warning: Monitor the situation closely.');
-  } else if (option === 'green') {
-    message.success('✅ Green Warning: Situation is under control.');
-  }
-};
-
-const handleEmergencyModalClose = () => {
-  setIsEmergencyModalVisible(false);
-  setSelectedOption(null); // Reset selected option on close
-};
+    setIsEmergencyModalVisible(true);
+    setSelectedOption(null);
+  };
+  // emergency pop-up close
+  const handleEmergencyModalClose = () => {
+    setIsEmergencyModalVisible(false);
+    setSelectedOption(null); // Reset selected option on close
+  };
 
   return (
     <div className="manage-container">
@@ -258,175 +309,170 @@ const handleEmergencyModalClose = () => {
         <nav>
           <ul>
             <li className="active">Dashboard</li>
-            <li onClick={() => navigate('/manage-posts')}>Manage All Posts</li>
-            <li onClick={() => navigate('/admin-view')}>View Bulletin</li>
+            <li onClick={() => navigate("/manage-posts")}>Manage All Posts</li>
+            <li onClick={() => navigate("/admin-view")}>View Bulletin</li>
           </ul>
         </nav>
-        <a href="/" className="logout">Log Out</a>
+        <a href="/" className="logout">
+          Log Out
+        </a>
       </aside>
-      
 
       <main className="main-content">
         <div className="container">
-            <h1>DASHBOARD</h1>
+          <h1>DASHBOARD</h1>
 
-            <div className="post">
+          <div className="post">
             <h2>📝 Create New Post</h2>
 
-            <p>Fill out the form below to publish a new bulletin post. All posts will be displayed
-              on the public board after submission. Photo upload is optional.</p>
+            <p>
+              Fill out the form below to publish a new bulletin post. All posts
+              will be displayed on the public board after submission. Photo
+              upload is optional.
+            </p>
 
-           <Form
+            <Form
               form={form}
               layout="vertical"
               autoComplete="off"
               onFinish={handleAddPost}
->
-            <Form.Item
-              name="category"
-              rules={[{ required: true, message: 'Category is required' }]}
             >
-              <Select className="custom-select" placeholder="Select a category" loading={!categories.length}>
-                {categories.map((category) => (
-                  <Option key={category.id} value={category.id}>
-                    {category.name}
-        </Option>
-      ))}
-    </Select>
-  </Form.Item>
+              <Form.Item
+                name="category"
+                rules={[{ required: true, message: "Category is required" }]}
+              >
+                <Select
+                  className="custom-select"
+                  placeholder="Select a category"
+                  loading={!categories.length}
+                >
+                  {categories.map((category) => (
+                    <Option key={category.id} value={category.id}>
+                      {category.name}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
 
-  <Form.Item
-    name="title"
-    rules={[{ required: true, message: 'Title is required' }]}
-  >
-    <Input className="custom-title" placeholder="Title" />
-  </Form.Item>
+              <Form.Item
+                name="title"
+                rules={[{ required: true, message: "Title is required" }]}
+              >
+                <Input className="custom-title" placeholder="Title" />
+              </Form.Item>
 
-  <Form.Item
-    name="description"
-    rules={[{ required: true, message: 'Description is required' }]}
-  >
-    <TextArea
-      className="custom-description"
-      placeholder="Description..."
-      autoSize={{ minRows: 3, maxRows: 10 }}
-    />
-  </Form.Item>
+              <Form.Item
+                name="description"
+                rules={[{ required: true, message: "Description is required" }]}
+              >
+                <TextArea
+                  className="custom-description"
+                  placeholder="Description..."
+                  autoSize={{ minRows: 3, maxRows: 10 }}
+                />
+              </Form.Item>
 
-  <Form.Item>
-    <Upload
-      listType="picture-circle"
-      fileList={fileList}
-      beforeUpload={() => false}
-      onPreview={handlePreview}
-      onChange={handleChange}
-    >
-      {fileList.length >= 5 ? null : uploadButton}
-    </Upload>
-    {previewImage && (
-      <Image
-        wrapperStyle={{ display: 'none' }}
-        preview={{
-          visible: previewOpen,
-          onVisibleChange: (visible) => setPreviewOpen(visible),
-          afterOpenChange: (visible) => !visible && setPreviewImage(''),
-        }}
-        src={previewImage}
-      />
-    )}
-  </Form.Item>
+              <Form.Item>
+                <Upload
+                  listType="picture-circle"
+                  fileList={fileList}
+                  beforeUpload={() => false}
+                  onPreview={handlePreview}
+                  onChange={handleChange}
+                >
+                  {fileList.length >= 5 ? null : uploadButton}
+                </Upload>
+                {previewImage && (
+                  <Image
+                    wrapperStyle={{ display: "none" }}
+                    preview={{
+                      visible: previewOpen,
+                      onVisibleChange: (visible) => setPreviewOpen(visible),
+                      afterOpenChange: (visible) =>
+                        !visible && setPreviewImage(""),
+                    }}
+                    src={previewImage}
+                  />
+                )}
+              </Form.Item>
 
-  <Form.Item>
-    <SubmitButton form={form} className="post-button" />
-  </Form.Item>
-</Form>
-                    </div>
+              <Form.Item>
+                <SubmitButton form={form} className="post-button" />
+              </Form.Item>
+            </Form>
+          </div>
         </div>
       </main>
-     
-    <section className="post-section">
-<Modal
-  title="🚨 Emergency Action Required"
-  open={isEmergencyModalVisible}
-  onCancel={handleEmergencyModalClose}
-  cancelText="Cancel"
-  className="emergency-modal"
-  centered
-  width={500}
-  styles={{ body: { padding: '24px' } }}
->
-  <div className="emergency-button-group">
-    <Button
-      className={`emergency-option-button red-button ${selectedOption === 'red' ? 'selected' : ''}`}
-      onClick={() => handleEmergencySelect('red')}
-    >
-      RED WARNING
-    </Button>
-    <Button
-      className={`emergency-option-button green-button ${selectedOption === 'green' ? 'selected' : ''}`}
-      onClick={() => handleEmergencySelect('green')}
-    >
-      GREEN WARNING
-    </Button>
-    <Button
-      className={`emergency-option-button yellow-button ${selectedOption === 'yellow' ? 'selected' : ''}`}
-      onClick={() => handleEmergencySelect('yellow')}
-    >
-      YELLOW WARNING
-    </Button>
-  </div>
-</Modal>
 
-
-  <div className="emerg-button">
-  <h1>EMERGENCY</h1>
-  <button className="emergency-btn" onClick={showEmergencyModal}>
-    <FaBell />
-  </button>
-</div>
-
-  <h2>All Posts</h2>
-  <p>Click on a post title below to view or edit its full content.</p>
- <Space direction="vertical" style={{ width: '100%' }}>
-    <Search
-      className="search-bar"
-      placeholder="Search title"
-      allowClear
-      enterButton="Search"
-      size="middle"
-      prefix={<SearchOutlined />}
-      onSearch={(value) => setSearchTerm(value)}
-      onChange={(e) => setSearchTerm(e.target.value)}
-    />
-</Space>
-
-  <ul className="post-list">
-    {filteredPosts.map((post) => (
-      <li key={post.id}>
-        <strong>
-          {getIcon(post.category)} {post.title} (
-          {categories.find((cat) => cat.name === post.category)?.name || 'Unknown'})
-        </strong>
-        <p>{post.content.substring(0, 40)}...</p>
-        {post.images && post.images.length > 0 && (
-          <div>
-            {post.images.map((imageUrl, index) => (
-              <img
-                key={index}
-                src={imageUrl}
-                alt="Post image"
-                style={{ width: '50px', height: '50px', marginRight: '5px' }}
-              />
-            ))}
-          </div>
-        )}
-        <Button type="link" danger onClick={() => handleDeletePost(post.id)}>
-          Delete
-        </Button>
-      </li>
-    ))}
-  </ul>
-</section>
+      <section className="post-section">
+        <div className="emerg-button">
+          <h1>EMERGENCY</h1>
+          <button
+            className="emergency-btn"
+            onClick={showEmergencyModal}
+            type="button"
+          >
+            <FaBell />
+          </button>
+        </div>
+        // end
+        <h2>All Posts</h2>
+        <p>Click on a post title below to view or edit its full content.</p>
+        <Space direction="vertical" style={{ width: "100%" }}>
+          <Search
+            className="search-bar"
+            placeholder="Search title"
+            allowClear
+            enterButton="Search"
+            size="middle"
+            prefix={<SearchOutlined />}
+            onSearch={(value) => setSearchTerm(value)}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </Space>
+        <ul className="post-list">
+          {filteredPosts.map((post) => (
+            <li key={post.id}>
+              <strong>
+                {getIcon(post.category)} {post.title} (
+                {categories.find((cat) => cat.name === post.category)?.name ||
+                  "Unknown"}
+                )
+              </strong>
+              <p>{post.content.substring(0, 40)}...</p>
+              {post.images && post.images.length > 0 && (
+                <div>
+                  {post.images.map((imageUrl, index) => (
+                    <img
+                      key={index}
+                      src={imageUrl}
+                      alt="Post image"
+                      style={{
+                        width: "50px",
+                        height: "50px",
+                        marginRight: "5px",
+                      }}
+                    />
+                  ))}
+                  <EmergencyModal
+                    visible={isEmergencyModalVisible}
+                    onClose={handleEmergencyModalClose}
+                    selectedOption={selectedOption}
+                    setSelectedOption={setSelectedOption}
+                  />
+                </div>
+              )}
+              <Button
+                type="link"
+                danger
+                onClick={() => handleDeletePost(post.id)}
+              >
+                Delete
+              </Button>
+            </li>
+          ))}
+        </ul>
+      </section>
     </div>
   );
-} 
+}

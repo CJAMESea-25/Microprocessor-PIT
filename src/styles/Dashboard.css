@@ -157,7 +157,7 @@ body {
   margin-left: 450px;
 }
 .post-section {
-  padding-top: 4rem;
+  padding-top: 2rem;
   top: 0; 
   background-color: white;
   padding-left: 1rem;
@@ -208,6 +208,8 @@ body {
   border-radius: 10px;
   padding-left: 15px;
 }
+
+/* emergency button */
 .emergency-btn {
  background-color: #f7e139;
   border-radius: 50%;
@@ -324,7 +326,6 @@ body {
   box-sizing: border-box; 
 }
 
-
 .red-button {
   border: 2px solid #b71111; 
   background-color: #b71111; 
@@ -359,6 +360,9 @@ body {
    border: 2px solid #F8D517; 
   background-color: #F8D517; 
   color: white; 
+}
+.red-button, .green-button, .yellow-button{
+  border-radius: 30px;
 }
 
 .emergency-message-error .ant-message-notice-content {
