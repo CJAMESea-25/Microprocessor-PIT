@@ -2,7 +2,7 @@ import { collection, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { message } from 'antd'; // Added import for message
+import { message } from 'antd';
 import EditPost from '../components/EditPost';
 import PreviewPost from '../components/PreviewPost';
 import { db } from '../firebase';
@@ -32,29 +32,29 @@ export default function ManagePosts() {
   const [categories, setCategories] = useState(['All']);
   const [sortOrder, setSortOrder] = useState('desc');
 
-  // Fetch posts and imageUrls from Firestore in real-time
   useEffect(() => {
-    // Fetch posts
     const unsubscribePosts = onSnapshot(collection(db, 'posts'), (snapshot) => {
-      const fetchedPosts = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        icon: getIcon(doc.data().category),
-        title: doc.data().title,
-        category: doc.data().category,
-        date: new Date(doc.data().timestamp).toLocaleDateString('en-US', {
-          month: '2-digit',
-          day: '2-digit',
-          year: 'numeric',
-        }).replace(/(\d+)\/(\d+)\/(\d+)/, '$1 / $2 / $3'),
-        content: doc.data().content,
-      }));
+      const fetchedPosts = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          icon: getIcon(data.category),
+          title: data.title,
+          category: data.category,
+          type: data.type,
+          date: new Date(data.timestamp).toLocaleDateString('en-US', {
+            month: '2-digit',
+            day: '2-digit',
+            year: 'numeric',
+          }).replace(/(\d+)\/(\d+)\/(\d+)/, '$1 / $2 / $3'),
+          content: data.content,
+        };
+      });
       console.log('Fetched posts from Firestore:', fetchedPosts);
 
-      // Extract unique categories
       const uniqueCategories = ['All', ...new Set(fetchedPosts.map(post => post.category))].filter(Boolean);
       setCategories(uniqueCategories);
 
-      // Merge posts with images from imageUrls
       setPosts(fetchedPosts.map(post => ({
         ...post,
         images: imageUrls.filter(img => img.postId === post.id).map(img => img.url),
@@ -64,7 +64,6 @@ export default function ManagePosts() {
       message.error('Failed to load posts');
     });
 
-    // Fetch imageUrls
     const unsubscribeImages = onSnapshot(collection(db, 'imageUrls'), (snapshot) => {
       const fetchedImageUrls = snapshot.docs.map((doc) => ({
         id: doc.id,
@@ -73,7 +72,6 @@ export default function ManagePosts() {
       console.log('Fetched imageUrls:', fetchedImageUrls);
       setImageUrls(fetchedImageUrls);
 
-      // Update posts with images
       setPosts(prevPosts => prevPosts.map(post => ({
         ...post,
         images: fetchedImageUrls.filter(img => img.postId === post.id).map(img => img.url),
@@ -87,7 +85,7 @@ export default function ManagePosts() {
       unsubscribePosts();
       unsubscribeImages();
     };
-  }, []);
+  }, [imageUrls]);
 
   const handleDeleteClick = (post) => {
     setPostToDelete(post);
@@ -98,7 +96,6 @@ export default function ManagePosts() {
     if (postToDelete) {
       try {
         await deleteDoc(doc(db, 'posts', postToDelete.id));
-        // Delete associated images from imageUrls collection
         const imagesToDelete = imageUrls.filter(img => img.postId === postToDelete.id);
         const deleteImagePromises = imagesToDelete.map(img => deleteDoc(doc(db, 'imageUrls', img.id)));
         await Promise.all(deleteImagePromises);
@@ -147,7 +144,7 @@ export default function ManagePosts() {
               day: '2-digit',
               year: 'numeric',
             }).replace(/(\d+)\/(\d+)\/(\d+)/, '$1 / $2 / $3'),
-            images: updatedPost.images || [], // Use images array from EditPost
+            images: updatedPost.images || [],
           }
         : post
     );
@@ -155,18 +152,29 @@ export default function ManagePosts() {
     closeEdit();
   };
 
-  // Filter and sort posts
   const filteredPosts = posts
     .filter((post) => {
-      const matchesSearch = searchTerm === '' || post.title.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = searchTerm === '' || post.title?.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = selectedCategory === 'All' || post.category === selectedCategory;
-      return matchesSearch && matchesCategory;
+      const isNotEmergency = post?.type !== 'emergency';
+      return matchesSearch && matchesCategory && isNotEmergency;
     })
     .sort((a, b) => {
       const dateA = new Date(a.date.split(' / ').reverse().join('-'));
       const dateB = new Date(b.date.split(' / ').reverse().join('-'));
       return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
     });
+
+  const handleRowClick = (post) => {
+    openPreview(post);
+  };
+
+  const handleKeyDown = (e, post) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openPreview(post);
+    }
+  };
 
   return (
     <div className="manage-container">
@@ -218,17 +226,36 @@ export default function ManagePosts() {
             </thead>
             <tbody>
               {filteredPosts.map((post) => (
-                <tr key={post.id}>
-                  <td onClick={() => openPreview(post)} style={{ cursor: 'pointer' }}>
+                <tr
+                  key={post.id}
+                  onClick={() => handleRowClick(post)}
+                  onKeyDown={(e) => handleKeyDown(e, post)}
+                  role="button"
+                  tabIndex={0}
+                  className="clickable-row"
+                >
+                  <td>
                     {post.icon} {post.title}
                   </td>
                   <td>{post.category}</td>
                   <td>{post.date}</td>
-                  <td>
-                    <button className="edit-btn" onClick={() => openEdit(post)}>
+                  <td onClick={(e) => e.stopPropagation()}>
+                    <button
+                      className="edit-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openEdit(post);
+                      }}
+                    >
                       <FaEdit />
                     </button>
-                    <button className="delete-btn" onClick={() => handleDeleteClick(post)}>
+                    <button
+                      className="delete-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteClick(post);
+                      }}
+                    >
                       <FaTrash />
                     </button>
                   </td>

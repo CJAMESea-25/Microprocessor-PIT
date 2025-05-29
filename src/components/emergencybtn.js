@@ -1,54 +1,138 @@
-// components/EmergencyModal.jsx
 import { Modal, message, Button } from 'antd';
-import { useEffect } from 'react';
-import '../styles/emergencybtn.css';
+import { useEffect, useState } from 'react';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { db } from '../firebase';
+import '../styles/EmergencyBtn.css';
 
 export default function EmergencyModal({
   visible,
   onClose,
-  selectedOption,
+  selectedDisaster,
   setSelectedOption,
 }) {
-  useEffect(() => {
-    if (selectedOption === 'red') {
-      message.warning('🚨 Red Warning: Immediate action required!');
-    } else if (selectedOption === 'yellow') {
-      message.info('⚠️ Yellow Warning: Monitor the situation closely.');
-    } else if (selectedOption === 'green') {
-      message.success('✅ Green Warning: Situation is under control.');
-    }
-  }, [selectedOption]);
+  const [selectedLevel, setSelectedLevel] = useState(null);
+  const [messages, setMessages] = useState({
+    red: { title: '', content: '' },
+    yellow: { title: '', content: '' },
+    green: { title: '', content: '' },
+  });
 
-  const handleEmergencySelect = (value) => {
-    setSelectedOption(value);
+  useEffect(() => {
+    if (!selectedDisaster) return;
+
+    const fetchMessages = async () => {
+      try {
+        const redDoc = await getDoc(doc(db, 'posts', `${selectedDisaster}Red`));
+        const yellowDoc = await getDoc(doc(db, 'posts', `${selectedDisaster}Yellow`));
+        const greenDoc = await getDoc(doc(db, 'posts', `${selectedDisaster}Green`));
+
+        setMessages({
+          red: redDoc.exists() ? redDoc.data() : { title: '', content: '' },
+          yellow: yellowDoc.exists() ? yellowDoc.data() : { title: '', content: '' },
+          green: greenDoc.exists() ? greenDoc.data() : { title: '', content: '' },
+        });
+      } catch (error) {
+        message.error(`Failed to fetch messages from Firestore: ${error.message}`);
+      }
+    };
+
+    fetchMessages();
+  }, [selectedDisaster]);
+
+  useEffect(() => {
+    if (selectedLevel === 'red') {
+      message.warning(messages.red.content || '🚨 Red Warning: Immediate action required!');
+    } else if (selectedLevel === 'yellow') {
+      message.info(messages.yellow.content || '⚠️ Yellow Warning: Monitor the situation closely.');
+    } else if (selectedLevel === 'green') {
+      message.success(messages.green.content || '✅ Green Warning: Situation is under control.');
+    }
+  }, [selectedLevel, messages]);
+
+  const handleEmergencySelect = async (level) => {
+    setSelectedLevel(level);
+    setSelectedOption(level);
+
+    if (!selectedDisaster) {
+      message.error('No disaster selected. Please select a disaster first.');
+      setSelectedLevel(null);
+      setSelectedOption(null);
+      return; // Do not close modal yet to allow user to retry
+    }
+
+    try {
+      // Deactivate all emergency messages
+      const disasterIds = ['rainfall', 'floodTyphoon', 'earthquake', 'volcanicEruption', 'landslide'];
+      const levels = ['Red', 'Yellow', 'Green'];
+      for (const disaster of disasterIds) {
+        for (const lvl of levels) {
+          const docRef = doc(db, 'posts', `${disaster}${lvl}`);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            await updateDoc(docRef, { active: false });
+          }
+        }
+      }
+
+      // Activate the selected message
+      const docId = `${selectedDisaster}${level.charAt(0).toUpperCase() + level.slice(1)}`;
+      const docRef = doc(db, 'posts', docId);
+      const docSnap = await getDoc(docRef);
+      if (!docSnap.exists()) {
+        message.error(`Emergency post ${docId} does not exist in Firestore.`);
+        return; // Do not close modal to allow user to retry
+      }
+
+      await updateDoc(docRef, {
+        active: true,
+        timestamp: new Date().toISOString(),
+      });
+
+      message.success(`Activated ${selectedDisaster} ${level} warning`);
+      setTimeout(() => {
+        setSelectedLevel(null); // Reset selection
+        onClose(); // Close modal after slight delay for feedback
+      }, 500); // 500ms delay to ensure success message is visible
+    } catch (error) {
+      message.error(`Failed to update Firestore: ${error.message}`);
+    }
+  };
+  const handleCancel = () => {
+    setSelectedLevel(null); // Reset selection
+    setSelectedOption(null); // Reset option in parent
+    onClose(); // Close modal
   };
 
   return (
     <Modal
-      title="🚨 Emergency Action Required"
+      title={`🚨 ${selectedDisaster ? selectedDisaster.charAt(0).toUpperCase() + selectedDisaster.slice(1) : 'Emergency'} Action Required`}
       open={visible}
-      onCancel={onClose}
-      cancelText="Cancel"
+      onCancel={handleCancel}
       className="emergency-modal"
       centered
       width={500}
       styles={{ body: { padding: '24px' } }}
+      footer={[
+        <Button key="cancel" onClick={handleCancel} className="emergency-cancel-button">
+          Cancel
+        </Button>,
+      ]}
     >
       <div className="emergency-button-group">
         <Button
-          className={`emergency-option-button red-button ${selectedOption === 'red' ? 'selected' : ''}`}
+          className={`emergency-option-button red-button ${selectedLevel === 'red' ? 'selected' : ''}`}
           onClick={() => handleEmergencySelect('red')}
         >
           RED WARNING
         </Button>
         <Button
-          className={`emergency-option-button green-button ${selectedOption === 'green' ? 'selected' : ''}`}
+          className={`emergency-option-button green-button ${selectedLevel === 'green' ? 'selected' : ''}`}
           onClick={() => handleEmergencySelect('green')}
         >
           GREEN WARNING
         </Button>
         <Button
-          className={`emergency-option-button yellow-button ${selectedOption === 'yellow' ? 'selected' : ''}`}
+          className={`emergency-option-button yellow-button ${selectedLevel === 'yellow' ? 'selected' : ''}`}
           onClick={() => handleEmergencySelect('yellow')}
         >
           YELLOW WARNING

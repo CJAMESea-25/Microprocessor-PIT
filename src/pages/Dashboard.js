@@ -1,28 +1,15 @@
-import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
-import {
-  Button,
-  Form,
-  Image,
-  Input,
-  Select,
-  Space,
-  Upload,
-  message,
-} from "antd";
-import {
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  onSnapshot,
-} from "firebase/firestore";
+import { SearchOutlined } from "@ant-design/icons";
+import { Button, Dropdown, Form, Image, Input, Menu, Select, Space, Upload, message } from "antd";
+import { addDoc, collection, deleteDoc, doc, onSnapshot, updateDoc, setDoc } from "firebase/firestore"; // Added setDoc
 import { useEffect, useState } from "react";
+import { FaBell, FaEllipsisV } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { onAuthStateChanged } from "firebase/auth"; // Added for auth check
+import { auth, db } from "../firebase"; // Added auth import
+import DisasterModal from "../components/DisasterBtn";
+import EmergencyModal from "../components/EmergencyBtn";
 import Sidebar from '../components/sidebar';
-import { db } from "../firebase";
 import "../styles/Dashboard.css";
-import EmergencyModal from "../components/emergencybtn";
-import { FaBell } from "react-icons/fa";
 
 const { TextArea, Search } = Input;
 const { Option } = Select;
@@ -35,26 +22,25 @@ const getBase64 = (file) =>
     reader.onerror = (error) => reject(error);
   });
 
-const SubmitButton = ({ form }) => {
+const SubmitButton = ({ form, isEditMode }) => {
   const [submittable, setSubmittable] = useState(false);
   const values = Form.useWatch([], form);
 
   useEffect(() => {
     form
       .validateFields({ validateOnly: true })
-      .then(() => {
-        console.log("Form validation passed, values:", values);
-        setSubmittable(true);
-      })
-      .catch((errors) => {
-        console.log("Form validation failed:", errors);
-        setSubmittable(false);
-      });
+      .then(() => setSubmittable(true))
+      .catch(() => setSubmittable(false));
   }, [form, values]);
 
   return (
-    <Button className="post-button" type="primary" htmlType="submit" disabled={!submittable}>
-      ADD POST
+    <Button
+      className="post-button"
+      type="primary"
+      htmlType="submit"
+      disabled={!submittable}
+    >
+      {isEditMode ? "UPDATE POST" : "ADD POST"}
     </Button>
   );
 };
@@ -69,9 +55,24 @@ export default function Dashboard() {
   const [categories, setCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [form] = Form.useForm();
-  const [isEmergencyModalVisible, setIsEmergencyModalVisible] = useState(false); // emergency pop-up Modal visibility state
+  const [isDisasterModalVisible, setIsDisasterModalVisible] = useState(false);
+  const [isEmergencyModalVisible, setIsEmergencyModalVisible] = useState(false);
+  const [selectedDisaster, setSelectedDisaster] = useState(null);
   const [selectedOption, setSelectedOption] = useState(null);
   const [selectedPost, setSelectedPost] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [currentMenuKey, setCurrentMenuKey] = useState("");
+
+  // Add authentication check
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        message.error('Please log in');
+        navigate('/login');
+      }
+    });
+    return () => unsubscribe();
+  }, [navigate]);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -81,7 +82,6 @@ export default function Dashboard() {
           id: doc.id,
           name: doc.data().name,
         }));
-        console.log("Fetched categories:", fetchedCategories);
         setCategories(fetchedCategories);
         if (!fetchedCategories.length) {
           message.warning("No categories found in Firestore. Using defaults.");
@@ -94,12 +94,6 @@ export default function Dashboard() {
         }
       },
       (error) => {
-        console.error(
-          "Error fetching categories:",
-          error.message,
-          "Code:",
-          error.code
-        );
         message.error("Failed to load categories. Using defaults.");
         setCategories([
           { id: "cat1", name: "Emergency Alerts" },
@@ -120,16 +114,9 @@ export default function Dashboard() {
           id: doc.id,
           ...doc.data(),
         }));
-        console.log("Fetched posts:", fetchedPosts);
         setPosts(fetchedPosts);
       },
       (error) => {
-        console.error(
-          "Error fetching posts:",
-          error.message,
-          "Code:",
-          error.code
-        );
         message.error("Failed to load posts");
       }
     );
@@ -144,16 +131,9 @@ export default function Dashboard() {
           id: doc.id,
           ...doc.data(),
         }));
-        console.log("Fetched imageUrls:", fetchedImageUrls);
         setImageUrls(fetchedImageUrls);
       },
       (error) => {
-        console.error(
-          "Error fetching imageUrls:",
-          error.message,
-          "Code:",
-          error.code
-        );
         message.error("Failed to load imageUrls");
       }
     );
@@ -168,42 +148,29 @@ export default function Dashboard() {
       setPreviewImage(file.url || file.preview);
       setPreviewOpen(true);
     } catch (error) {
-      console.error("Error previewing image:", error);
       message.error("Failed to preview image");
     }
   };
 
-  const handleChange = ({ fileList: newFileList }) => {
-    console.log("Updated fileList:", newFileList);
-    setFileList(newFileList);
-  };
+  const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
 
   const getIcon = (cat) => {
     if (!cat) return "📌";
     if (cat.includes("Emergency Alerts")) return "🚨";
     if (cat.includes("General Announcements")) return "📢";
-    if (cat.includes("Community News") || cat.includes("Community Events"))
-      return "📅";
+    if (cat.includes("Community News") || cat.includes("Community Events")) return "📅";
     if (cat.includes("Reminders or Notices")) return "📝";
     return "📌";
   };
 
   const handleAddPost = async (values) => {
-    console.log(
-      "handleAddPost called with values:",
-      values,
-      "fileList:",
-      fileList
-    );
     if (!values.category || !values.title || !values.description) {
-      console.log("Validation failed: Missing fields");
       message.error("Please fill out all required fields");
       return;
     }
 
     try {
-      const categoryName =
-        categories.find((cat) => cat.id === values.category)?.name || "";
+      const categoryName = categories.find((cat) => cat.id === values.category)?.name || "";
       const newPost = {
         category: categoryName,
         title: values.title,
@@ -211,62 +178,100 @@ export default function Dashboard() {
         timestamp: new Date().toISOString(),
       };
 
-      console.log("Saving post to Firestore:", newPost);
-      const postRef = await addDoc(collection(db, "posts"), newPost).catch(
-        (error) => {
-          throw new Error(`Firestore write failed: ${error.message}`);
-        }
-      );
-      console.log("Post saved successfully with ID:", postRef.id);
-
-      // Save images to the 'imageUrls' collection
-      if (fileList.length > 0) {
-        const imagePromises = fileList.map(async (file) => {
-          const base64Image = await getBase64(file.originFileObj);
-          return addDoc(collection(db, "imageUrls"), {
-            postId: postRef.id,
-            url: base64Image,
-            createdAt: new Date().toISOString(),
+      if (isEditMode && selectedPost) {
+        const postRef = doc(db, "posts", selectedPost.id);
+        await updateDoc(postRef, newPost);
+        if (fileList.length > 0) {
+          const existingImages = imageUrls.filter((img) => img.postId === selectedPost.id);
+          await Promise.all(existingImages.map((img) => deleteDoc(doc(db, "imageUrls", img.id))));
+          const imagePromises = fileList.map(async (file) => {
+            const base64Image = await getBase64(file.originFileObj);
+            return addDoc(collection(db, "imageUrls"), {
+              postId: selectedPost.id,
+              url: base64Image,
+              createdAt: new Date().toISOString(),
+            });
           });
-        });
-        await Promise.all(imagePromises);
+          await Promise.all(imagePromises);
+        }
+        message.success("Post updated successfully");
+        setIsEditMode(false);
+        setSelectedPost(null);
+      } else {
+        const postRef = await addDoc(collection(db, "posts"), newPost);
+        if (fileList.length > 0) {
+          const imagePromises = fileList.map(async (file) => {
+            const base64Image = await getBase64(file.originFileObj);
+            return addDoc(collection(db, "imageUrls"), {
+              postId: postRef.id,
+              url: base64Image,
+              createdAt: new Date().toISOString(),
+            });
+          });
+          await Promise.all(imagePromises);
+        }
+        message.success("Post added successfully");
       }
 
       form.resetFields();
       setFileList([]);
-      message.success("Post added successfully");
     } catch (error) {
-      console.error("Error adding post:", error.message, "Code:", error.code);
-      message.error(`Failed to add post: ${error.message}`);
+      message.error(`Failed to ${isEditMode ? "update" : "add"} post: ${error.message}`);
     }
   };
 
   const handleDeletePost = async (postId) => {
     try {
       await deleteDoc(doc(db, "posts", postId));
-      const imageUrlsToDelete = imageUrls.filter(
-        (imageUrl) => imageUrl.postId === postId
-      );
+      const imageUrlsToDelete = imageUrls.filter((imageUrl) => imageUrl.postId === postId);
       const deleteImageUrlPromises = imageUrlsToDelete.map((imageUrl) =>
         deleteDoc(doc(db, "imageUrls", imageUrl.id))
       );
       await Promise.all(deleteImageUrlPromises);
       message.success("Post and associated image URLs deleted successfully");
+      setSelectedPost(null);
     } catch (error) {
-      console.error("Error deleting post:", error.message, "Code:", error.code);
       message.error("Failed to delete post");
     }
   };
 
+  const handleEditPost = () => {
+    if (selectedPost) {
+      setIsEditMode(true);
+      form.setFieldsValue({
+        category: categories.find((cat) => cat.name === selectedPost.category)?.id,
+        title: selectedPost.title,
+        description: selectedPost.content,
+      });
+      const postImages = imageUrls
+        .filter((img) => img.postId === selectedPost.id)
+        .map((img, index) => ({
+          uid: `-${index}`,
+          name: `image${index + 1}.png`,
+          status: "done",
+          url: img.url,
+        }));
+      setFileList(postImages);
+      setSelectedPost(null);
+    }
+  };
+
+  const menu = (post) => (
+    <Menu>
+      <Menu.Item key="edit" onClick={() => handleEditPost(post)}>
+        Edit
+      </Menu.Item>
+      <Menu.Item key="delete" danger onClick={() => handleDeletePost(post.id)}>
+        Delete
+      </Menu.Item>
+    </Menu>
+  );
+
   const filteredPosts = posts
-    .filter((post) =>
-      post?.title?.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    .filter((post) => post?.type !== 'emergency' && post?.title?.toLowerCase().includes(searchTerm.toLowerCase()))
     .map((post) => ({
       ...post,
-      images: imageUrls
-        .filter((img) => img.postId === post.id)
-        .map((img) => img.url),
+      images: imageUrls.filter((img) => img.postId === post.id).map((img) => img.url),
     }));
 
   const uploadButton = (
@@ -275,21 +280,47 @@ export default function Dashboard() {
     </button>
   );
 
-  const showEmergencyModal = () => {
-    setIsEmergencyModalVisible(true);
+  const showDisasterModal = () => {
+    setIsDisasterModalVisible(true);
     setSelectedOption(null);
+    setSelectedDisaster(null);
   };
-  // emergency pop-up close
+
+  const handleDisasterModalClose = () => {
+    setIsDisasterModalVisible(false);
+    setSelectedDisaster(null);
+  };
+
+  const handleDisasterSelect = (disasterId) => {
+    setSelectedDisaster(disasterId);
+    setIsDisasterModalVisible(false);
+    setIsEmergencyModalVisible(true);
+  };
+
   const handleEmergencyModalClose = () => {
     setIsEmergencyModalVisible(false);
-    setSelectedOption(null); // Reset selected option on close
+    setSelectedOption(null);
+    setSelectedDisaster(null);
   };
-   const handlePostClick = (post) => {
+
+  const handleCancelEdit = () => {
+    form.resetFields();
+    setFileList([]);
+    setIsEditMode(false);
+  };
+
+  const handlePostClick = (post) => {
     setSelectedPost(post);
+    setIsEditMode(false);
+    form.resetFields();
+    setFileList([]);
   };
 
   const handleBack = () => {
     setSelectedPost(null);
+    setIsEditMode(false);
+    form.resetFields();
+    setFileList([]);
   };
 
   return (
@@ -310,7 +341,12 @@ export default function Dashboard() {
           <h1>DASHBOARD</h1>
           {selectedPost ? (
             <div className="post">
-              <h2>👁️ Preview Post</h2>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h2>👁️ Preview Post</h2>
+                <Dropdown overlay={() => menu(selectedPost)} trigger={['click']}>
+                  <Button type="link" icon={<FaEllipsisV />} style={{ fontSize: '20px' }} />
+                </Dropdown>
+              </div>
               <p>
                 You're currently viewing a published post. Use the three-dot
                 menu to edit or delete this post.
@@ -346,14 +382,12 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="post">
-              <h2>📝 Create New Post</h2>
-
+              <h2>{isEditMode ? "✍️ Edit Post" : "📝 Create New Post"}</h2>
               <p>
-                Fill out the form below to publish a new bulletin post. All
-                posts will be displayed on the public board after submission.
-                Photo upload is optional.
+                {isEditMode
+                  ? "Edit the post details below. All changes will be updated on the public board after submission."
+                  : "Fill out the form below to publish a new bulletin post. All posts will be displayed on the public board after submission. Photo upload is optional."}
               </p>
-
               <Form
                 form={form}
                 layout="vertical"
@@ -377,7 +411,6 @@ export default function Dashboard() {
                     ))}
                   </Select>
                 </Form.Item>
-
                 <Form.Item
                   name="title"
                   className="form-item-spacing"
@@ -385,13 +418,10 @@ export default function Dashboard() {
                 >
                   <Input className="custom-title" placeholder="Title" />
                 </Form.Item>
-
                 <Form.Item
                   name="description"
                   className="form-item-spacing"
-                  rules={[
-                    { required: true, message: "Description is required" },
-                  ]}
+                  rules={[{ required: true, message: "Description is required" }]}
                 >
                   <TextArea
                     className="custom-description"
@@ -399,7 +429,6 @@ export default function Dashboard() {
                     autoSize={{ minRows: 3, maxRows: 10 }}
                   />
                 </Form.Item>
-
                 <Form.Item className="form-item-upload-spacing">
                   <Upload
                     className="custom-upload"
@@ -417,15 +446,14 @@ export default function Dashboard() {
                       preview={{
                         visible: previewOpen,
                         onVisibleChange: (visible) => setPreviewOpen(visible),
-                        afterOpenChange: (visible) =>
-                          !visible && setPreviewImage(""),
+                        afterOpenChange: (visible) => !visible && setPreviewImage(""),
                       }}
                       src={previewImage}
                     />
                   )}
                 </Form.Item>
                 <Form.Item className="form-item-spacing">
-                  <SubmitButton form={form} className="post-button" />
+                  <SubmitButton form={form} isEditMode={isEditMode} />
                 </Form.Item>
               </Form>
             </div>
@@ -437,7 +465,7 @@ export default function Dashboard() {
           <h1>EMERGENCY</h1>
           <button
             className="emergency-btn"
-            onClick={showEmergencyModal}
+            onClick={showDisasterModal}
             type="button"
           >
             <FaBell />
@@ -457,8 +485,7 @@ export default function Dashboard() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </Space>
-
-         <ul className="post-list">
+        <ul className="post-list">
           {filteredPosts.map((post) => (
             <li key={post.id}>
               <div className="post-item">
@@ -478,12 +505,6 @@ export default function Dashboard() {
                       className="post-list-image"
                     />
                   ))}
-                   <EmergencyModal
-                    visible={isEmergencyModalVisible}
-                    onClose={handleEmergencyModalClose}
-                    selectedOption={selectedOption}
-                    setSelectedOption={setSelectedOption}
-                  />
                 </div>
               )}
               <Button
@@ -496,6 +517,17 @@ export default function Dashboard() {
             </li>
           ))}
         </ul>
+        <DisasterModal
+          visible={isDisasterModalVisible}
+          onClose={handleDisasterModalClose}
+          onDisasterSelect={handleDisasterSelect}
+        />
+        <EmergencyModal
+          visible={isEmergencyModalVisible}
+          onClose={handleEmergencyModalClose}
+          selectedDisaster={selectedDisaster}
+          setSelectedOption={setSelectedOption}
+        />
       </section>
     </div>
   );
