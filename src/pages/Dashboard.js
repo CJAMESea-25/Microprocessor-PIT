@@ -1,5 +1,3 @@
-import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
-import { Button, Form, Image, Input, Select, Space, Upload, message, Modal } from 'antd';
 import { addDoc, collection, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -7,6 +5,8 @@ import { db } from '../firebase';
 import '../styles/Dashboard.css';
 import Sidebar from '../components/sidebar';
 import { FaBell } from 'react-icons/fa';
+import { Button, Form, Image, Input, Select, Space, Upload, message, Modal } from 'antd';
+import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 
 const { TextArea, Search } = Input;
 const { Option } = Select;
@@ -49,7 +49,6 @@ export default function Dashboard() {
   const [previewImage, setPreviewImage] = useState('');
   const [fileList, setFileList] = useState([]);
   const [posts, setPosts] = useState([]);
-  const [postImages, setPostImages] = useState({}); // Map of postId to array of image base64 strings
   const [imageUrls, setImageUrls] = useState([]);
   const [categories, setCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -71,7 +70,7 @@ export default function Dashboard() {
         setCategories([
           { id: 'cat1', name: 'Emergency Alerts' },
           { id: 'cat3', name: 'General Announcements' },
-          { id: 'cat4', name: 'Community Events'},
+          { id: 'cat4', name: 'Community Events' },
           { id: 'cat5', name: 'Reminders or Notices' },
         ]);
       }
@@ -140,52 +139,55 @@ export default function Dashboard() {
     if (!cat) return '📌';
     if (cat.includes('Emergency Alerts')) return '🚨';
     if (cat.includes('General Announcements')) return '📢';
-    if (cat.includes('Community News')) return '📅';
+    if (cat.includes('Community News') || cat.includes('Community Events')) return '📅';
     if (cat.includes('Reminders or Notices')) return '📝';
     return '📌';
   };
 
-const handleAddPost = async (values) => {
-  console.log('handleAddPost called with values:', values, 'fileList:', fileList);
-  if (!values.category || !values.title || !values.description) {
-    console.log('Validation failed: Missing fields');
-    message.error('Please fill out all required fields');
-    return;
-  }
-
-  try {
-    const categoryName = categories.find((cat) => cat.id === values.category)?.name || '';
-    const newPost = {
-      category: categoryName,
-      title: values.title,
-      content: values.description,
-      timestamp: new Date().toISOString(),
-    };
-
-    console.log('Saving post to Firestore:', newPost);
-    const postRef = await addDoc(collection(db, 'posts'), newPost).catch((error) => {
-      throw new Error(`Firestore write failed: ${error.message}`);
-    });
-    console.log('Post saved successfully with ID:', postRef.id);
-
-    // Store images in state instead of Firestore
-    if (fileList.length > 0) {
-      const imagePromises = fileList.map(async (file) => await getBase64(file.originFileObj));
-      const base64Images = await Promise.all(imagePromises);
-      setPostImages((prev) => ({
-        ...prev,
-        [postRef.id]: base64Images,
-      }));
+  const handleAddPost = async (values) => {
+    console.log('handleAddPost called with values:', values, 'fileList:', fileList);
+    if (!values.category || !values.title || !values.description) {
+      console.log('Validation failed: Missing fields');
+      message.error('Please fill out all required fields');
+      return;
     }
 
-    form.resetFields();
-    setFileList([]);
-    message.success('Post added successfully');
-  } catch (error) {
-    console.error('Error adding post:', error.message, 'Code:', error.code);
-    message.error(`Failed to add post: ${error.message}`);
-  }
-};
+    try {
+      const categoryName = categories.find((cat) => cat.id === values.category)?.name || '';
+      const newPost = {
+        category: categoryName,
+        title: values.title,
+        content: values.description,
+        timestamp: new Date().toISOString(),
+      };
+
+      console.log('Saving post to Firestore:', newPost);
+      const postRef = await addDoc(collection(db, 'posts'), newPost).catch((error) => {
+        throw new Error(`Firestore write failed: ${error.message}`);
+      });
+      console.log('Post saved successfully with ID:', postRef.id);
+
+      // Save images to the 'imageUrls' collection
+      if (fileList.length > 0) {
+        const imagePromises = fileList.map(async (file) => {
+          const base64Image = await getBase64(file.originFileObj);
+          return addDoc(collection(db, 'imageUrls'), {
+            postId: postRef.id,
+            url: base64Image,
+            createdAt: new Date().toISOString(),
+          });
+        });
+        await Promise.all(imagePromises);
+      }
+
+      form.resetFields();
+      setFileList([]);
+      message.success('Post added successfully');
+    } catch (error) {
+      console.error('Error adding post:', error.message, 'Code:', error.code);
+      message.error(`Failed to add post: ${error.message}`);
+    }
+  };
 
   const handleDeletePost = async (postId) => {
     try {
@@ -206,7 +208,7 @@ const handleAddPost = async (values) => {
     .filter((post) => post?.title?.toLowerCase().includes(searchTerm.toLowerCase()))
     .map((post) => ({
       ...post,
-      images: postImages[post.id] || [], // Use images from state
+      images: imageUrls.filter((img) => img.postId === post.id).map((img) => img.url),
     }));
 
   const uploadButton = (
@@ -427,7 +429,6 @@ const handleAddPost = async (values) => {
                 </strong>
               </div>
               <p>{post.content.substring(0, 40)}...</p>
-              {/* Display images if they exist */}
               {post.images && post.images.length > 0 && (
                 <div className="post-images">
                   {post.images.map((imageUrl, index) => (
