@@ -1,154 +1,163 @@
-    body {
-    margin: 0;
-    background-color: #f8f9fa;
-    }
+body {
+  margin: 0;
+  background-color: #f8f9fa;
+}
 
-    .manage-container {
-    display: flex;
-    min-height: 90vh;
-    }
+.manage-container {
+  display: flex;
+  min-height: 90vh;
+}
 
-    .main-content {
-    flex-grow: 1;
-    padding: 2rem;
-    }
+.main-content {
+  flex-grow: 1;
+  padding: 2rem;
+}
 
-    .container {
-    background-color: #CCE0FF;
-    font-size: 20px;
-    border-radius: 10px;
-    padding: 2rem;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    max-width: 100%;
-    max-height: 80vh;
-    overflow-y: auto;
-    overflow-x: hidden;
-    }
+.container {
+  background-color: #CCE0FF;
+  font-size: 20px;
+  border-radius: 10px;
+  padding: 2rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
 
-    .main-content h1 {
-    margin: 0;
-    color: black;
-    }
+.main-content h1 {
+  margin: 0;
+  color: black;
+}
 
-    .controls {
-    display: flex;
-    gap: 5rem;
-    align-items: center;
-    flex-wrap: nowrap;
-    }
+.controls {
+  display: flex;
+  gap: 5rem;
+  align-items: center;
+  flex-wrap: nowrap;
+}
 
-    .controls input,
-    .controls select {
-    padding: 10px;
-    border: 1px solid #ccc;
-    gap: 10rem;
-    border-radius: 8px;
-    flex-grow: 0;
-    min-width: 200px;
-    }
+.controls input,
+.controls select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  gap: 10rem;
+  border-radius: 8px;
+  flex-grow: 0;
+  min-width: 200px;
+}
 
-    .controls input[type="text"] {
-    width: 300px;
-    height: 40px;
-    font-size: 16px;
-    }
+.controls input[type="text"] {
+  width: 300px;
+  height: 40px;
+  font-size: 16px;
+}
 
-    .controls label {
-    display: inline-block;
-    margin-bottom: 0;
-    margin-right: 5px;
-    font-size: 16px;
-    font-weight: bold;
-    color: #2c3e50;
-    vertical-align: middle;
-    }
+.controls label {
+  display: inline-block;
+  margin-bottom: 0;
+  margin-right: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #2c3e50;
+  vertical-align: middle;
+}
 
-    .posts-table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: white;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    }
+.posts-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
 
-    .posts-table th,
-    .posts-table td {
-    padding: 1rem;
-    text-align: left;
-    border-bottom: 1px solid #eee;
-    }
+.posts-table th,
+.posts-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
 
-    .posts-table .emoji {
-    margin-right: 0.5rem;
-    }
+.posts-table .emoji {
+  margin-right: 0.5rem;
+}
 
-    .icon-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    margin-right: 0.5rem;
-    font-size: 1rem;
-    color: #34495e;
-    }
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-right: 0.5rem;
+  font-size: 1rem;
+  color: #34495e;
+}
 
-    .icon-btn:hover {
-    color: #007bff;
-    }
+.icon-btn:hover {
+  color: #007bff;
+}
 
-    .popup-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 999;
-    }
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
 
-    .popup {
-    background: white;
-    border-top: 12px solid #0070ff;
-    padding: 2rem;
-    border-radius: 12px;
-    text-align: center;
-    width: 90%;
-    max-width: 400px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-    }
+.popup {
+  background: white;
+  border-top: 12px solid #0070ff;
+  padding: 2rem;
+  border-radius: 12px;
+  text-align: center;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
 
-    .popup h3 {
-    color: #D2042D;
-    margin-bottom: 1rem;
-    }
+.popup h3 {
+  color: #D2042D;
+  margin-bottom: 1rem;
+}
 
-    .popup-buttons {
-    margin-top: 1.5rem;
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    }
+.popup-buttons {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
 
-    .popup-buttons .confirm {
-    background-color: #D2042D;
-    color: white;
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    }
+.popup-buttons .confirm {
+  background-color: #D2042D;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
 
-    .popup-buttons .cancel {
-    background-color: #7f8c8d;
-    color: white;
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    }
+.popup-buttons .cancel {
+  background-color: #7f8c8d;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Added styles for clickable rows */
+.posts-table tbody tr.clickable-row {
+  cursor: pointer;
+}
+
+.posts-table tbody tr.clickable-row:hover {
+  background-color: #f5f5f5; /* Light hover effect */
+}
