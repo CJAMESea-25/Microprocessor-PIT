@@ -1,21 +1,6 @@
 import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
-import {
-  Button,
-  Form,
-  Image,
-  Input,
-  Select,
-  Space,
-  Upload,
-  message,
-} from "antd";
-import {
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  onSnapshot,
-} from "firebase/firestore";
+import {Button, Form, Image, Input, Select, Space, Upload, message,} from "antd";
+import { addDoc, collection, deleteDoc, doc, onSnapshot,} from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from '../components/sidebar';
@@ -224,7 +209,6 @@ export default function Dashboard() {
       );
       console.log("Post saved successfully with ID:", postRef.id);
 
-      // Save images to the 'imageUrls' collection
       if (fileList.length > 0) {
         const imagePromises = fileList.map(async (file) => {
           const base64Image = await getBase64(file.originFileObj);
@@ -284,10 +268,19 @@ export default function Dashboard() {
     setIsEmergencyModalVisible(true);
     setSelectedOption(null);
   };
+
   // emergency pop-up close
   const handleEmergencyModalClose = () => {
     setIsEmergencyModalVisible(false);
     setSelectedOption(null); // Reset selected option on close
+  };
+
+  const handlePostClick = (post) => {
+    setSelectedPost(post);
+  };
+
+  const handleBack = () => {
+    setSelectedPost(null);
   };
 
   return (
