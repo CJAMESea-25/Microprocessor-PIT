@@ -10,7 +10,7 @@ body {
 
 .sidebar {
   width: 250px;
-  height: 100vh;
+  max-height: 100vh;
   background-color: white;  
   color: #2c3e50;           
   padding: 2rem 1rem;
@@ -64,7 +64,7 @@ body {
 
 .logout {
   display: block;
-  margin: 120px auto;
+  margin: 30px auto;
   padding: 5px 5px;
   color: white;
   text-align: center;
@@ -163,6 +163,7 @@ body {
   background-color: white;
   padding-left: 1rem;
   padding-right: 1rem;
+  max-height: 100;
 
 }
 .post-section h2, .post-section p{
