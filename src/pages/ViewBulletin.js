@@ -122,16 +122,23 @@ const ViewBulletin = () => {
         <h4>
           {getIcon(post.category)} {post.title || 'No Title'}
         </h4>
-        <p className="posted-date">
-          Posted on {post.timestamp ? new Date(post.timestamp).toLocaleString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true
-          }) : 'N/A'}
-        </p>
+       <p className="posted-date">
+  Posted on {post.timestamp ? (
+    <>
+      {new Date(post.timestamp).toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })}
+      <br />
+      at {new Date(post.timestamp).toLocaleString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      })}
+    </>
+  ) : 'N/A'}
+</p>
         <p className="post-main-content">
           {post.content || post.description || 'No content provided.'}
         </p>

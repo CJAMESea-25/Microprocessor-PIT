@@ -1,11 +1,13 @@
-import { PlusOutlined } from '@ant-design/icons';
-import { Button, Form, Image, Input, Select, Space, Upload, message } from 'antd';
+import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
+import { Button, Form, Image, Input, Select, Space, Upload, message, Modal } from 'antd';
 import { addDoc, collection, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
 import '../styles/Dashboard.css';
 import Sidebar from '../components/sidebar';
+import { FaBell } from 'react-icons/fa';
+
 
 const { TextArea, Search } = Input;
 const { Option } = Select;
@@ -36,7 +38,7 @@ const SubmitButton = ({ form }) => {
   }, [form, values]);
 
   return (
-    <Button type="primary" htmlType="submit" disabled={!submittable}>
+    <Button className="post-button" type="primary" htmlType="submit" disabled={!submittable}>
       ADD POST
     </Button>
   );
@@ -52,8 +54,9 @@ export default function Dashboard() {
   const [categories, setCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [form] = Form.useForm();
+  const [isEmergencyModalVisible, setIsEmergencyModalVisible] = useState(false); // Modal visibility state
+const [selectedOption, setSelectedOption] = useState(null);
 
-  // Fetch categories from Firestore
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'categories'), (snapshot) => {
       const fetchedCategories = snapshot.docs.map((doc) => ({
@@ -84,7 +87,6 @@ export default function Dashboard() {
     return () => unsubscribe();
   }, []);
 
-  // Fetch posts from Firestore in real-time
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'posts'), (snapshot) => {
       const fetchedPosts = snapshot.docs.map((doc) => ({
@@ -100,7 +102,6 @@ export default function Dashboard() {
     return () => unsubscribe();
   }, []);
 
-  // Fetch image URLs from Firestore in real-time
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'imageUrls'), (snapshot) => {
       const fetchedImageUrls = snapshot.docs.map((doc) => ({
@@ -222,10 +223,30 @@ export default function Dashboard() {
 
   const uploadButton = (
     <button style={{ border: 0, background: 'none' }} type="button">
-      <PlusOutlined />
-      <div style={{ marginTop: 8 }}>Upload</div>
+      
+      <div style={{ marginTop: 8 }}>Upload Image</div>
     </button>
   );
+  const showEmergencyModal = () => {
+  setIsEmergencyModalVisible(true);
+  setSelectedOption(null);
+};
+const handleEmergencySelect = (option) => {
+  setSelectedOption(option);
+
+  if (option === 'red') {
+    message.warning('🚨 Red Warning: Immediate action required!');
+  } else if (option === 'yellow') {
+    message.info('⚠️ Yellow Warning: Monitor the situation closely.');
+  } else if (option === 'green') {
+    message.success('✅ Green Warning: Situation is under control.');
+  }
+};
+
+const handleEmergencyModalClose = () => {
+  setIsEmergencyModalVisible(false);
+  setSelectedOption(null); // Reset selected option on close
+};
 
   return (
     <div className="manage-container">
@@ -241,13 +262,12 @@ export default function Dashboard() {
               form={form}
               layout="vertical"
               autoComplete="off"
-              onFinish={handleAddPost}
-            >
+              onFinish={handleAddPost}>
               <Form.Item
                 name="category"
-                rules={[{ required: true, message: 'Category is required' }]}
-              >
-                <Select placeholder="Select a category" loading={!categories.length}>
+                style={{ marginBottom: '10px' }}
+                rules={[{ required: true, message: 'Category is required' }]}>
+                <Select className="custom-select" placeholder="Select a category" loading={!categories.length}>
                   {categories.map((category) => (
                     <Option key={category.id} value={category.id}>
                       {category.name}
@@ -255,87 +275,147 @@ export default function Dashboard() {
                   ))}
                 </Select>
               </Form.Item>
-              <Form.Item
-                name="title"
-                rules={[{ required: true, message: 'Title is required' }]}
-              >
-                <Input placeholder="Title" />
-              </Form.Item>
-              <Form.Item
-                name="description"
-                rules={[{ required: true, message: 'Description is required' }]}
-              >
-                <TextArea placeholder="Description..." autoSize={{ minRows: 3, maxRows: 6 }} />
-              </Form.Item>
-              <Form.Item>
-                <Upload
-                  listType="picture-circle"
-                  fileList={fileList}
-                  beforeUpload={() => false}
-                  onPreview={handlePreview}
-                  onChange={handleChange}
-                >
-                  {fileList.length >= 5 ? null : uploadButton}
-                </Upload>
-                {previewImage && (
-                  <Image
-                    wrapperStyle={{ display: 'none' }}
-                    preview={{
-                      visible: previewOpen,
-                      onVisibleChange: (visible) => setPreviewOpen(visible),
-                      afterOpenChange: (visible) => !visible && setPreviewImage(''),
-                    }}
-                    src={previewImage}
-                  />
-                )}
-              </Form.Item>
-              <Form.Item>
-                <SubmitButton form={form} />
-              </Form.Item>
-            </Form>
-          </div>
+
+  <Form.Item
+    name="title"
+    style={{ marginBottom: '10px' }}
+    rules={[{ required: true, message: 'Title is required' }]}
+  >
+    <Input className="custom-title" placeholder="Title" />
+  </Form.Item>
+
+  <Form.Item
+    name="description"
+    style={{ marginBottom: '10px' }}
+    rules={[{ required: true, message: 'Description is required' }]}
+  >
+    <TextArea
+      className="custom-description"
+      placeholder="Description..."
+      autoSize={{ minRows: 3, maxRows: 10 }}
+    />
+  </Form.Item>
+
+  <Form.Item
+    style={{ marginBottom: '15px' }}
+  >
+  <Upload
+    className="custom-upload"
+    listType="picture"
+    fileList={fileList}
+    beforeUpload={() => false}
+    onPreview={handlePreview}
+    onChange={handleChange}
+  >
+    {fileList.length >= 5 ? null : uploadButton}
+  </Upload>
+
+  {previewImage && (
+    <Image
+      wrapperStyle={{ display: 'none' }}
+      preview={{
+        visible: previewOpen,
+        onVisibleChange: (visible) => setPreviewOpen(visible),
+        afterOpenChange: (visible) => !visible && setPreviewImage(''),
+      }}
+      src={previewImage}
+    />
+  )}
+</Form.Item>
+
+  <Form.Item
+    style={{ marginBottom: '10px' }}
+  >
+    <SubmitButton form={form} className="post-button" />
+  </Form.Item>
+</Form>
+                    </div>
         </div>
       </main>
-      <section className="post-section">
-        <h2>All Posts</h2>
-        <p>Click on a post title below to view or edit its full content.</p>
-        <Space direction="vertical" style={{ width: '100%' }}>
-          <Search
-            placeholder="Search title"
-            allowClear
-            enterButton="Search"
-            size="middle"
-            onSearch={(value) => setSearchTerm(value)}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </Space>
-        <ul className="post-list">
-          {filteredPosts.map((post) => (
-            <li key={post.id}>
-              <strong>
-                {getIcon(post.category)} {post.title} (
-                {categories.find((cat) => cat.name === post.category)?.name || 'Unknown'})
-              </strong>
-              <p>{post.content.substring(0, 40)}...</p>
-              {post.images && post.images.length > 0 && (
-                <div>
-                  {post.images.map((imageUrl, index) => (
-                    <img
-                      key={index}
-                      src={imageUrl}
-                      alt="Post image"
-                      style={{ width: '50px', height: '50px', marginRight: '5px' }}
-                    />
-                  ))}
-                </div>
-              )}
-              <Button type="link" danger onClick={() => handleDeletePost(post.id)}>
-                Delete
-              </Button>
-            </li>
-          ))}
-        </ul>
-      </section>
+     
+    <section className="post-section">
+<Modal
+  title="🚨 Emergency Action Required"
+  open={isEmergencyModalVisible}
+  onCancel={handleEmergencyModalClose}
+  cancelText="Cancel"
+  className="emergency-modal"
+  centered
+  width={500}
+  styles={{ body: { padding: '24px' } }}
+>
+  <div className="emergency-button-group">
+    <Button
+      className={`emergency-option-button red-button ${selectedOption === 'red' ? 'selected' : ''}`}
+      onClick={() => handleEmergencySelect('red')}
+    >
+      RED WARNING
+    </Button>
+    <Button
+      className={`emergency-option-button green-button ${selectedOption === 'green' ? 'selected' : ''}`}
+      onClick={() => handleEmergencySelect('green')}
+    >
+      GREEN WARNING
+    </Button>
+    <Button
+      className={`emergency-option-button yellow-button ${selectedOption === 'yellow' ? 'selected' : ''}`}
+      onClick={() => handleEmergencySelect('yellow')}
+    >
+      YELLOW WARNING
+    </Button>
+  </div>
+</Modal>
+
+
+  <div className="emerg-button">
+  <h1>EMERGENCY</h1>
+  <button className="emergency-btn" onClick={showEmergencyModal}>
+    <FaBell />
+  </button>
+</div>
+
+  <h2>All Posts</h2>
+  <p>Click on a post title below to view or edit its full content.</p>
+ <Space direction="vertical" style={{ width: '100%' }}>
+    <Search
+      className="search-bar"
+      placeholder="Search title"
+      allowClear
+      enterButton="Search"
+      size="middle"
+      prefix={<SearchOutlined />}
+      onSearch={(value) => setSearchTerm(value)}
+      onChange={(e) => setSearchTerm(e.target.value)}
+    />
+</Space>
+
+  <ul className="post-list">
+    {filteredPosts.map((post) => (
+      <li key={post.id}>
+        <strong>
+          {getIcon(post.category)} {post.title} (
+          {categories.find((cat) => cat.name === post.category)?.name || 'Unknown'})
+        </strong>
+        <p>{post.content.substring(0, 40)}...</p>
+        {post.images && post.images.length > 0 && (
+          <div>
+            {post.images.map((imageUrl, index) => (
+              <img
+                key={index}
+                src={imageUrl}
+                alt="Post image"
+                style={{ width: '50px', height: '50px', marginRight: '5px' }}
+              />
+            ))}
+          </div>
+        )}
+        <Button type="link" danger onClick={() => handleDeletePost(post.id)}>
+          Delete
+        </Button>
+      </li>
+    ))}
+  </ul>
+</section>
     </div>
   );
 }
