@@ -64,7 +64,7 @@ body {
 
 .logout {
   display: block;
-  margin-bottom: 120px;
+  margin-bottom: 30px;
   padding: 5px 5px;
   color: white;
   text-align: center;
@@ -76,7 +76,7 @@ body {
 
 
 .main-content {
-  height: 100vh;
+  max-height: 100vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -162,7 +162,7 @@ body {
   background-color: white;
   padding-left: 1rem;
   padding-right: 1rem;
-  max-height: 100;
+  max-height: 100vh;
 
 }
 .post-section h2, .post-section p{
@@ -175,7 +175,7 @@ body {
   margin-top: 20px; 
    z-index: 10; 
   width: 100%; 
-   max-height: 55vh;
+   max-height: 50vh;
   overflow-y: auto; 
 }
 
