@@ -11,30 +11,45 @@ body {
   min-height: 100vh;
 }
 
-.view-main-content {
-  flex-grow: 1;
-  padding: 2rem;
-  max-height: 80vh;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.view-bulletin {
-  background-color: #CCE0FF;
-  padding: 2rem;
-  border-radius: 10px;
-  width: 1220px;
-}
-
-.bulletin-posts {
-  background-color: white;
-  margin-top: 1rem;
+.sidebar {
+  width: 250px;
+  background-color: white;  
+  color: #2c3e50;           
+  padding: 2rem 1rem;
+  display: flex;
   flex-direction: column;
-  padding: 1rem;
-  border-radius: 10px;
-  width: 1160px;
 }
 
+.sidebar-header {
+  display: flex;
+  align-items: center; 
+  gap: 10px;
+  margin-bottom: 2rem;
+}
+
+.sidebar-logo {
+  width: 40px;
+  height: auto;
+  display: block; 
+}
+.view-main-content{
+  padding: 1rem;
+  height: 100%;
+  width: 100% ;
+  overflow-y: auto;    
+  overflow-x: hidden;  
+
+}
+.container {
+  min-height: 90vh;
+    border-radius: 40px;
+}
+.container h1{
+  color: black;
+}
+.content-container{
+  background-color: white;
+  padding: 2rem;
   border-radius: 20px;
   height: 100%;
   margin-top: -20px;
@@ -48,5 +63,4 @@ body {
   border-radius: 30px;
   height: 100%;
 }
-
 
