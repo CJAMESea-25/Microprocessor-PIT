@@ -1,11 +1,12 @@
-import { PlusOutlined , SearchOutlined} from '@ant-design/icons';
-import { Button, Form, Image, Input, Select, Space, Upload, message } from 'antd';
+import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
+import { Button, Form, Image, Input, Select, Space, Upload, message, Modal } from 'antd';
 import { addDoc, collection, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import sidebar from '../assets/BayadBoardLogo.png';
 import { db } from '../firebase';
 import '../styles/Dashboard.css';
+import { FaBell } from 'react-icons/fa';
 
 
 const { TextArea, Search } = Input;
@@ -53,8 +54,9 @@ export default function Dashboard() {
   const [categories, setCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [form] = Form.useForm();
+  const [isEmergencyModalVisible, setIsEmergencyModalVisible] = useState(false); // Modal visibility state
+const [selectedOption, setSelectedOption] = useState(null);
 
-  // Fetch categories from Firestore
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'categories'), (snapshot) => {
       const fetchedCategories = snapshot.docs.map((doc) => ({
@@ -85,7 +87,6 @@ export default function Dashboard() {
     return () => unsubscribe();
   }, []);
 
-  // Fetch posts from Firestore in real-time
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'posts'), (snapshot) => {
       const fetchedPosts = snapshot.docs.map((doc) => ({
@@ -101,7 +102,6 @@ export default function Dashboard() {
     return () => unsubscribe();
   }, []);
 
-  // Fetch image URLs from Firestore in real-time
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'imageUrls'), (snapshot) => {
       const fetchedImageUrls = snapshot.docs.map((doc) => ({
@@ -227,6 +227,26 @@ export default function Dashboard() {
       <div style={{ marginTop: 8 }}>Upload</div>
     </button>
   );
+  const showEmergencyModal = () => {
+  setIsEmergencyModalVisible(true);
+  setSelectedOption(null);
+};
+const handleEmergencySelect = (option) => {
+  setSelectedOption(option);
+
+  if (option === 'red') {
+    message.warning('🚨 Red Warning: Immediate action required!');
+  } else if (option === 'yellow') {
+    message.info('⚠️ Yellow Warning: Monitor the situation closely.');
+  } else if (option === 'green') {
+    message.success('✅ Green Warning: Situation is under control.');
+  }
+};
+
+const handleEmergencyModalClose = () => {
+  setIsEmergencyModalVisible(false);
+  setSelectedOption(null); // Reset selected option on close
+};
 
   return (
     <div className="manage-container">
@@ -325,9 +345,46 @@ export default function Dashboard() {
       </main>
      
     <section className="post-section">
-  <div className="emerg-button">
-    <h1>EMERGENCY</h1>
+<Modal
+  title="🚨 Emergency Action Required"
+  open={isEmergencyModalVisible}
+  onCancel={handleEmergencyModalClose}
+  cancelText="Cancel"
+  className="emergency-modal"
+  centered
+  width={500}
+  styles={{ body: { padding: '24px' } }}
+>
+  <div className="emergency-button-group">
+    <Button
+      className={`emergency-option-button red-button ${selectedOption === 'red' ? 'selected' : ''}`}
+      onClick={() => handleEmergencySelect('red')}
+    >
+      RED WARNING
+    </Button>
+    <Button
+      className={`emergency-option-button green-button ${selectedOption === 'green' ? 'selected' : ''}`}
+      onClick={() => handleEmergencySelect('green')}
+    >
+      GREEN WARNING
+    </Button>
+    <Button
+      className={`emergency-option-button yellow-button ${selectedOption === 'yellow' ? 'selected' : ''}`}
+      onClick={() => handleEmergencySelect('yellow')}
+    >
+      YELLOW WARNING
+    </Button>
   </div>
+</Modal>
+
+
+  <div className="emerg-button">
+  <h1>EMERGENCY</h1>
+  <button className="emergency-btn" onClick={showEmergencyModal}>
+    <FaBell />
+  </button>
+</div>
+
   <h2>All Posts</h2>
   <p>Click on a post title below to view or edit its full content.</p>
  <Space direction="vertical" style={{ width: '100%' }}>
