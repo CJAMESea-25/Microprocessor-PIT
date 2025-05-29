@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
-import sidebar from '../assets/BayadBoardLogo.png';
 import '../styles/AdminViewBulletin.css';
 import '../styles/ViewBulletin.css';
 import Sidebar from '../components/sidebar';
