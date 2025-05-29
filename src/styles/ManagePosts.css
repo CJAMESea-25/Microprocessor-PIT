@@ -1,218 +1,154 @@
-body {
-  margin: 0;
-  background-color: #f8f9fa;
-}
+    body {
+    margin: 0;
+    background-color: #f8f9fa;
+    }
 
-.manage-container {
-  display: flex;
-  min-height: 90vh;
-}
+    .manage-container {
+    display: flex;
+    min-height: 90vh;
+    }
 
-.sidebar {
-  width: 250px;
-  height: 900px;
-  background-color: white;  
-  color: #2c3e50;           
-  padding: 2rem 1rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
+    .main-content {
+    flex-grow: 1;
+    padding: 2rem;
+    }
 
-.sidebar-header {
-  display: flex;
-  align-items: center; 
-  gap: 10px;
-  margin-bottom: 2rem;
-}
+    .container {
+    background-color: #CCE0FF;
+    font-size: 20px;
+    border-radius: 10px;
+    padding: 2rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    }
 
-.sidebar-logo {
-  width: 40px;
-  height: auto;
-  display: block; 
-  margin-top: 50px;
-  margin-left: 20px;
-}
+    .main-content h1 {
+    margin: 0;
+    color: black;
+    }
 
-.logo-text {
-  color: black;
-  font-weight: 200;
-  margin-top: 65px;        
-  line-height: 1;   
-  font-size: 50px;
-  font-family: 'Jomhuria', cursive;
-}
+    .controls {
+    display: flex;
+    gap: 5rem;
+    align-items: center;
+    flex-wrap: nowrap;
+    }
 
-.sidebar nav ul {
-  list-style: none;
-  padding: 0;
-}
+    .controls input,
+    .controls select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    gap: 10rem;
+    border-radius: 8px;
+    flex-grow: 0;
+    min-width: 200px;
+    }
 
-.sidebar nav li {
-  padding: 0.75rem 1rem;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: background 0.3s;
-  color: #2c3e50;
-}
+    .controls input[type="text"] {
+    width: 300px;
+    height: 40px;
+    font-size: 16px;
+    }
 
-.sidebar nav li:hover,
-.sidebar nav .active {
-  background-color: #d0e7ff; 
-}
+    .controls label {
+    display: inline-block;
+    margin-bottom: 0;
+    margin-right: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #2c3e50;
+    vertical-align: middle;
+    }
 
-.sidebar .logout {
-  text-align: center;
-  color: #2c3e50;
-  text-decoration: underline;
-  font-weight: bold;
-  margin-top: 2rem;
-  display: block;
-}
+    .posts-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
 
-.main-content {
-  flex-grow: 1;
-  padding: 2rem;
-}
+    .posts-table th,
+    .posts-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+    }
 
-.container {
-  background-color: #CCE0FF; 
-  font-size: 20px;
-  border-radius: 10px;
-  padding: 2rem;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  max-width: 100%;
-  max-height: 80vh;   
-  overflow-y: auto;    
-  overflow-x: hidden;  
-}
+    .posts-table .emoji {
+    margin-right: 0.5rem;
+    }
 
-.main-content h1 {
-  margin: 0;
-  color: black;
-}
+    .icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-right: 0.5rem;
+    font-size: 1rem;
+    color: #34495e;
+    }
 
-.controls {
-  display: flex;
-  gap: 5rem;
-  align-items: center; 
-  flex-wrap: nowrap; 
-}
+    .icon-btn:hover {
+    color: #007bff;
+    }
 
-.controls input,
-.controls select {
-  padding: 10px; 
-  border: 1px solid #ccc;
-  gap: 10rem;
-  border-radius: 8px;
-  flex-grow: 0; 
-  min-width: 200px; /* Minimum width for consistency */
-}
+    .popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    }
 
+    .popup {
+    background: white;
+    border-top: 12px solid #0070ff;
+    padding: 2rem;
+    border-radius: 12px;
+    text-align: center;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
 
-.controls input[type="text"] {
-  width: 300px; /* Adjusted to a reasonable width based on screenshot */
-  height: 40px; /* Adjusted height for better appearance */
-  font-size: 16px; 
-}
+    .popup h3 {
+    color: #D2042D;
+    margin-bottom: 1rem;
+    }
 
-/* Customize label font and alignment */
-.controls label {
-  display: inline-block; /* Changed to inline-block for horizontal alignment */
-  margin-bottom: 0; /* Remove bottom margin to align with inputs */
-  margin-right: 5px; /* Space between label and input */
-  font-size: 16px; 
-  font-weight: bold; 
-  color: #2c3e50; 
-  vertical-align: middle; /* Align label vertically with input */
-}
+    .popup-buttons {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    }
 
-.posts-table {
-  width: 100%;
-  border-collapse: collapse;
-  background-color: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-}
+    .popup-buttons .confirm {
+    background-color: #D2042D;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    }
 
-.posts-table th,
-.posts-table td {
-  padding: 1rem;
-  text-align: left;
-  border-bottom: 1px solid #eee;
-}
-
-.posts-table .emoji {
-  margin-right: 0.5rem;
-}
-
-.icon-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  margin-right: 0.5rem;
-  font-size: 1rem;
-  color: #34495e;
-}
-
-.icon-btn:hover {
-  color: #007bff;
-}
-
-.popup-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-}
-
-.popup {
-  background: white;
-  border-top: 12px solid #0070ff;
-  padding: 2rem;
-  border-radius: 12px;
-  text-align: center;
-  width: 90%;
-  max-width: 400px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-}
-
-.popup h3 {
-  color: #D2042D;
-  margin-bottom: 1rem;
-}
-
-.popup-buttons {
-  margin-top: 1.5rem;
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-}
-
-.popup-buttons .confirm {
-  background-color: #D2042D;
-  color: white;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.popup-buttons .cancel {
-  background-color: #7f8c8d;
-  color: white;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
+    .popup-buttons .cancel {
+    background-color: #7f8c8d;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    }

@@ -33,9 +33,9 @@ header .logo img {
 
 .text-content h1{
   max-width: 100%;
-  font-size: 80px;
-  letter-spacing: 18px;
-  line-height: 70px;
+  font-size: 60px;
+  letter-spacing: 15px;
+  line-height: 50px;
   font-weight: 800;
   color: #0070ff;
   margin-bottom: 60px;
@@ -46,9 +46,9 @@ header .logo img {
 .text-content p {
   color: black;
   margin-top: -40px;
-  font-size: 20px;
+  font-size: 15px;
   margin-bottom: 30px;
-  line-height: 1.2;
+  line-height: 1.5;
   margin-left: 40px;
   margin-right: 80px;
   font-weight: 400;
@@ -56,15 +56,17 @@ header .logo img {
 
 /* Buttons */
 .buttons .btn {
-  padding: 25px 50px;
+  padding: 10px 10px;
   border-radius: 50px;
   text-decoration: none;
   font-weight: bold;
-  margin-right: 50px;
+  margin-right: 30px;
   display: inline-block;
-  margin-left: 50px;
+  margin-left: 40px;
   margin-top: 15px;
-  width: 250px;
+  width: 200px;
+  height: 50px;
+  text-align: center;
 }
 .buttons a{
   text-align: center;
@@ -82,12 +84,10 @@ header .logo img {
 
 /* Illustration */
 .illustration {
-  padding-left: 30px;
+  padding-left: 10px;
 }
 
 .illustration img {
-  width: 700px;
-  margin-top: 70px;
-  max-width: 100%;
-    margin-left: -100px; 
+  width: auto;
+  max-height: 75vh;
 }

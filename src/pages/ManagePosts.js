@@ -2,16 +2,17 @@ import { collection, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import sidebar from '../assets/BayadBoardLogo.png';
+import { message } from 'antd'; // Added import for message
 import EditPost from '../components/EditPost';
 import PreviewPost from '../components/PreviewPost';
-import { db } from '../firebase'; // Ensure this path is correct
+import { db } from '../firebase';
 import '../styles/ManagePosts.css';
+import Sidebar from '../components/sidebar';
 
 const getIcon = (cat) => {
   if (!cat) return '📌';
   if (cat.includes('Emergency')) return '🚨';
-  if (cat.includes('School Events')) return '📅';
+  if (cat.includes('School Events') || cat.includes('Community Events')) return '📅';
   if (cat.includes('Announcements')) return '📢';
   if (cat.includes('Lost and Found')) return '📝';
   if (cat.includes('Community News')) return '📰';
@@ -21,18 +22,20 @@ const getIcon = (cat) => {
 export default function ManagePosts() {
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
+  const [imageUrls, setImageUrls] = useState([]);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [postToDelete, setPostToDelete] = useState(null);
   const [selectedPost, setSelectedPost] = useState(null);
   const [postToEdit, setPostToEdit] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All'); // Default to 'All' to show all posts
-  const [categories, setCategories] = useState(['All']); // Start with 'All'
-  const [sortOrder, setSortOrder] = useState('desc'); // Default to descending (newest first)
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [categories, setCategories] = useState(['All']);
+  const [sortOrder, setSortOrder] = useState('desc');
 
-  // Fetch posts and categories from Firestore in real-time
+  // Fetch posts and imageUrls from Firestore in real-time
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, 'posts'), (snapshot) => {
+    // Fetch posts
+    const unsubscribePosts = onSnapshot(collection(db, 'posts'), (snapshot) => {
       const fetchedPosts = snapshot.docs.map((doc) => ({
         id: doc.id,
         icon: getIcon(doc.data().category),
@@ -44,20 +47,46 @@ export default function ManagePosts() {
           year: 'numeric',
         }).replace(/(\d+)\/(\d+)\/(\d+)/, '$1 / $2 / $3'),
         content: doc.data().content,
-        photo: doc.data().imageUrl && doc.data().imageUrl.length > 0 ? doc.data().imageUrl[0] : null,
       }));
       console.log('Fetched posts from Firestore:', fetchedPosts);
 
-      // Extract unique categories and include 'All'
+      // Extract unique categories
       const uniqueCategories = ['All', ...new Set(fetchedPosts.map(post => post.category))].filter(Boolean);
       setCategories(uniqueCategories);
 
-      setPosts(fetchedPosts);
+      // Merge posts with images from imageUrls
+      setPosts(fetchedPosts.map(post => ({
+        ...post,
+        images: imageUrls.filter(img => img.postId === post.id).map(img => img.url),
+      })));
     }, (error) => {
       console.error('Error fetching posts:', error.message, 'Code:', error.code);
       message.error('Failed to load posts');
     });
-    return () => unsubscribe();
+
+    // Fetch imageUrls
+    const unsubscribeImages = onSnapshot(collection(db, 'imageUrls'), (snapshot) => {
+      const fetchedImageUrls = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      console.log('Fetched imageUrls:', fetchedImageUrls);
+      setImageUrls(fetchedImageUrls);
+
+      // Update posts with images
+      setPosts(prevPosts => prevPosts.map(post => ({
+        ...post,
+        images: fetchedImageUrls.filter(img => img.postId === post.id).map(img => img.url),
+      })));
+    }, (error) => {
+      console.error('Error fetching imageUrls:', error.message, 'Code:', error.code);
+      message.error('Failed to load images');
+    });
+
+    return () => {
+      unsubscribePosts();
+      unsubscribeImages();
+    };
   }, []);
 
   const handleDeleteClick = (post) => {
@@ -69,7 +98,13 @@ export default function ManagePosts() {
     if (postToDelete) {
       try {
         await deleteDoc(doc(db, 'posts', postToDelete.id));
+        // Delete associated images from imageUrls collection
+        const imagesToDelete = imageUrls.filter(img => img.postId === postToDelete.id);
+        const deleteImagePromises = imagesToDelete.map(img => deleteDoc(doc(db, 'imageUrls', img.id)));
+        await Promise.all(deleteImagePromises);
+
         setPosts(posts.filter((p) => p.id !== postToDelete.id));
+        setImageUrls(imageUrls.filter(img => img.postId !== postToDelete.id));
         setShowDeletePopup(false);
         setPostToDelete(null);
         message.success('Post deleted successfully');
@@ -103,13 +138,24 @@ export default function ManagePosts() {
 
   const saveEdit = (updatedPost) => {
     const updatedPosts = posts.map((post) =>
-      post.id === updatedPost.id ? updatedPost : post
+      post.id === updatedPost.id
+        ? {
+            ...updatedPost,
+            icon: getIcon(updatedPost.category),
+            date: new Date(updatedPost.timestamp).toLocaleDateString('en-US', {
+              month: '2-digit',
+              day: '2-digit',
+              year: 'numeric',
+            }).replace(/(\d+)\/(\d+)\/(\d+)/, '$1 / $2 / $3'),
+            images: updatedPost.images || [], // Use images array from EditPost
+          }
+        : post
     );
     setPosts(updatedPosts);
     closeEdit();
   };
 
-  // Filter and sort posts based on search term, selected category, and sort order
+  // Filter and sort posts
   const filteredPosts = posts
     .filter((post) => {
       const matchesSearch = searchTerm === '' || post.title.toLowerCase().includes(searchTerm.toLowerCase());
@@ -119,35 +165,12 @@ export default function ManagePosts() {
     .sort((a, b) => {
       const dateA = new Date(a.date.split(' / ').reverse().join('-'));
       const dateB = new Date(b.date.split(' / ').reverse().join('-'));
-      // Sort by date based on sortOrder
-      const dateComparison = sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
-
-      // If a category is selected (not 'All'), prioritize category sorting first
-      if (selectedCategory !== 'All' && a.category === selectedCategory && b.category === selectedCategory) {
-        return dateComparison;
-      }
-
-      // If no category is selected or posts are from different categories, sort by date
-      return dateComparison;
+      return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
     });
 
   return (
     <div className="manage-container">
-      <aside className="sidebar">
-        <div className="sidebar-header">
-          <img src={sidebar} alt="BayanBoard Logo" className="sidebar-logo" />
-          <h2 className="logo-text">BayanBoard</h2>
-        </div>
-        <nav>
-          <ul>
-            <li onClick={() => navigate('/Dashboard')}>Dashboard</li>
-            <li className="active">Manage All Posts</li>
-            <li onClick={() => navigate('/admin-view')}>View Bulletin</li>
-          </ul>
-        </nav>
-        <a href="/" className="logout">Log Out</a>
-      </aside>
-
+      <Sidebar activePage="Manage All Posts" />
       <main className="main-content">
         <div className="container">
           <h1>MANAGE ALL POSTS</h1>

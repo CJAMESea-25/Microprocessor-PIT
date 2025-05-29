@@ -18,7 +18,7 @@ import {
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import sidebar from "../assets/BayadBoardLogo.png";
+import Sidebar from '../components/sidebar';
 import { db } from "../firebase";
 import "../styles/Dashboard.css";
 import EmergencyModal from "../components/emergencybtn";
@@ -76,6 +76,7 @@ export default function Dashboard() {
   const [form] = Form.useForm();
   const [isEmergencyModalVisible, setIsEmergencyModalVisible] = useState(false); // emergency pop-up Modal visibility state
   const [selectedOption, setSelectedOption] = useState(null);
+  const [selectedPost, setSelectedPost] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -92,7 +93,7 @@ export default function Dashboard() {
           setCategories([
             { id: "cat1", name: "Emergency Alerts" },
             { id: "cat3", name: "General Announcements" },
-            { id: "cat4", name: "Community News" },
+            { id: "cat4", name: "Community Events" },
             { id: "cat5", name: "Reminders or Notices" },
           ]);
         }
@@ -186,7 +187,8 @@ export default function Dashboard() {
     if (!cat) return "📌";
     if (cat.includes("Emergency Alerts")) return "🚨";
     if (cat.includes("General Announcements")) return "📢";
-    if (cat.includes("Community Events")) return "📅";
+    if (cat.includes("Community News") || cat.includes("Community Events"))
+      return "📅";
     if (cat.includes("Reminders or Notices")) return "📝";
     return "📌";
   };
@@ -205,7 +207,6 @@ export default function Dashboard() {
     }
 
     try {
-      // Save post to Firestore first
       const categoryName =
         categories.find((cat) => cat.id === values.category)?.name || "";
       const newPost = {
@@ -223,20 +224,17 @@ export default function Dashboard() {
       );
       console.log("Post saved successfully with ID:", postRef.id);
 
-      // Convert all images to Base64 and save to 'imageUrls' collection
+      // Save images to the 'imageUrls' collection
       if (fileList.length > 0) {
-        const imageUrlPromises = fileList.map(async (file) => {
+        const imagePromises = fileList.map(async (file) => {
           const base64Image = await getBase64(file.originFileObj);
-          const imageUrlDoc = {
+          return addDoc(collection(db, "imageUrls"), {
             postId: postRef.id,
-            imageUrl: base64Image,
-            timestamp: new Date().toISOString(),
-          };
-          return addDoc(collection(db, "imageUrls"), imageUrlDoc);
+            url: base64Image,
+            createdAt: new Date().toISOString(),
+          });
         });
-
-        await Promise.all(imageUrlPromises);
-        console.log("Image URLs saved successfully for post ID:", postRef.id);
+        await Promise.all(imagePromises);
       }
 
       form.resetFields();
@@ -250,10 +248,7 @@ export default function Dashboard() {
 
   const handleDeletePost = async (postId) => {
     try {
-      // Delete the post
       await deleteDoc(doc(db, "posts", postId));
-
-      // Delete associated image URLs
       const imageUrlsToDelete = imageUrls.filter(
         (imageUrl) => imageUrl.postId === postId
       );
@@ -261,7 +256,6 @@ export default function Dashboard() {
         deleteDoc(doc(db, "imageUrls", imageUrl.id))
       );
       await Promise.all(deleteImageUrlPromises);
-
       message.success("Post and associated image URLs deleted successfully");
     } catch (error) {
       console.error("Error deleting post:", error.message, "Code:", error.code);
@@ -271,21 +265,18 @@ export default function Dashboard() {
 
   const filteredPosts = posts
     .filter((post) =>
-      post?.title
-        ? post.title.toLowerCase().includes(searchTerm.toLowerCase())
-        : false
+      post?.title?.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .map((post) => ({
       ...post,
       images: imageUrls
-        .filter((imageUrl) => imageUrl.postId === post.id)
-        .map((img) => img.imageUrl),
+        .filter((img) => img.postId === post.id)
+        .map((img) => img.url),
     }));
 
   const uploadButton = (
-    <button style={{ border: 0, background: "none" }} type="button">
-      <PlusOutlined />
-      <div style={{ marginTop: 8 }}>Upload</div>
+    <button className="upload-button" type="button">
+      <div className="upload-button-text">Upload Image</div>
     </button>
   );
 
@@ -301,109 +292,144 @@ export default function Dashboard() {
 
   return (
     <div className="manage-container">
-      <aside className="sidebar">
-        <div className="sidebar-header">
-          <img src={sidebar} alt="BayanBoard Logo" className="sidebar-logo" />
-          <h2 className="logo-text">BayanBoard</h2>
-        </div>
-        <nav>
-          <ul>
-            <li className="active">Dashboard</li>
-            <li onClick={() => navigate("/manage-posts")}>Manage All Posts</li>
-            <li onClick={() => navigate("/admin-view")}>View Bulletin</li>
-          </ul>
-        </nav>
-        <a href="/" className="logout">
-          Log Out
-        </a>
-      </aside>
-
+      <Sidebar
+        activePage="Dashboard"
+        logo={<span className="logo-text">BayanBoard</span>}
+        user="admin123"
+        menuItems={[
+          { label: "Dashboard", onClick: () => {} },
+          { label: "Manage All Post", onClick: () => {} },
+          { label: "View Bulletin", onClick: () => {} },
+          { label: "Log Out", onClick: () => navigate("/logout") },
+        ]}
+      />
       <main className="main-content">
         <div className="container">
           <h1>DASHBOARD</h1>
-
-          <div className="post">
-            <h2>📝 Create New Post</h2>
-
-            <p>
-              Fill out the form below to publish a new bulletin post. All posts
-              will be displayed on the public board after submission. Photo
-              upload is optional.
-            </p>
-
-            <Form
-              form={form}
-              layout="vertical"
-              autoComplete="off"
-              onFinish={handleAddPost}
-            >
-              <Form.Item
-                name="category"
-                rules={[{ required: true, message: "Category is required" }]}
+          {selectedPost ? (
+            <div className="post">
+              <h2>👁️ Preview Post</h2>
+              <p>
+                You're currently viewing a published post. Use the three-dot
+                menu to edit or delete this post.
+              </p>
+              <p>
+                <strong>Title:</strong> {selectedPost.title}
+              </p>
+              <p>
+                <strong>Content:</strong> {selectedPost.content}
+              </p>
+              {selectedPost.images && selectedPost.images.length > 0 && (
+                <div className="preview-image-container">
+                  <strong>Images:</strong>
+                  <div>
+                    {selectedPost.images.map((imageUrl, index) => (
+                      <img
+                        key={index}
+                        src={imageUrl}
+                        alt="Post image"
+                        className="preview-image"
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+              <Button
+                type="primary"
+                onClick={handleBack}
+                className="go-back-button post-button"
               >
-                <Select
-                  className="custom-select"
-                  placeholder="Select a category"
-                  loading={!categories.length}
+                GO BACK
+              </Button>
+            </div>
+          ) : (
+            <div className="post">
+              <h2>📝 Create New Post</h2>
+
+              <p>
+                Fill out the form below to publish a new bulletin post. All
+                posts will be displayed on the public board after submission.
+                Photo upload is optional.
+              </p>
+
+              <Form
+                form={form}
+                layout="vertical"
+                autoComplete="off"
+                onFinish={handleAddPost}
+              >
+                <Form.Item
+                  name="category"
+                  className="form-item-spacing"
+                  rules={[{ required: true, message: "Category is required" }]}
                 >
-                  {categories.map((category) => (
-                    <Option key={category.id} value={category.id}>
-                      {category.name}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
+                  <Select
+                    className="custom-select"
+                    placeholder="Select a category"
+                    loading={!categories.length}
+                  >
+                    {categories.map((category) => (
+                      <Option key={category.id} value={category.id}>
+                        {category.name}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
 
-              <Form.Item
-                name="title"
-                rules={[{ required: true, message: "Title is required" }]}
-              >
-                <Input className="custom-title" placeholder="Title" />
-              </Form.Item>
-
-              <Form.Item
-                name="description"
-                rules={[{ required: true, message: "Description is required" }]}
-              >
-                <TextArea
-                  className="custom-description"
-                  placeholder="Description..."
-                  autoSize={{ minRows: 3, maxRows: 10 }}
-                />
-              </Form.Item>
-
-              <Form.Item>
-                <Upload
-                  listType="picture-circle"
-                  fileList={fileList}
-                  beforeUpload={() => false}
-                  onPreview={handlePreview}
-                  onChange={handleChange}
+                <Form.Item
+                  name="title"
+                  className="form-item-spacing"
+                  rules={[{ required: true, message: "Title is required" }]}
                 >
-                  {fileList.length >= 5 ? null : uploadButton}
-                </Upload>
-                {previewImage && (
-                  <Image
-                    wrapperStyle={{ display: "none" }}
-                    preview={{
-                      visible: previewOpen,
-                      onVisibleChange: (visible) => setPreviewOpen(visible),
-                      afterOpenChange: (visible) =>
-                        !visible && setPreviewImage(""),
-                    }}
-                    src={previewImage}
+                  <Input className="custom-title" placeholder="Title" />
+                </Form.Item>
+
+                <Form.Item
+                  name="description"
+                  className="form-item-spacing"
+                  rules={[
+                    { required: true, message: "Description is required" },
+                  ]}
+                >
+                  <TextArea
+                    className="custom-description"
+                    placeholder="Description..."
+                    autoSize={{ minRows: 3, maxRows: 10 }}
                   />
-                )}
-              </Form.Item>
+                </Form.Item>
 
-              <Form.Item>
-                <SubmitButton form={form} className="post-button" />
-              </Form.Item>
-            </Form>
-          </div>
+                <Form.Item className="form-item-upload-spacing">
+                  <Upload
+                    className="custom-upload"
+                    listType="picture"
+                    fileList={fileList}
+                    beforeUpload={() => false}
+                    onPreview={handlePreview}
+                    onChange={handleChange}
+                  >
+                    {fileList.length >= 5 ? null : uploadButton}
+                  </Upload>
+                  {previewImage && (
+                    <Image
+                      wrapperClassName="hidden-image"
+                      preview={{
+                        visible: previewOpen,
+                        onVisibleChange: (visible) => setPreviewOpen(visible),
+                        afterOpenChange: (visible) =>
+                          !visible && setPreviewImage(""),
+                      }}
+                      src={previewImage}
+                    />
+                  )}
+                </Form.Item>
+                <Form.Item className="form-item-spacing">
+                  <SubmitButton form={form} className="post-button" />
+                </Form.Item>
+              </Form>
+            </div>
+          )}
         </div>
       </main>
-
       <section className="post-section">
         <div className="emerg-button">
           <h1>EMERGENCY</h1>
@@ -415,7 +441,6 @@ export default function Dashboard() {
             <FaBell />
           </button>
         </div>
-        // end
         <h2>All Posts</h2>
         <p>Click on a post title below to view or edit its full content.</p>
         <Space direction="vertical" style={{ width: "100%" }}>
@@ -430,31 +455,28 @@ export default function Dashboard() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </Space>
-        <ul className="post-list">
+
+         <ul className="post-list">
           {filteredPosts.map((post) => (
             <li key={post.id}>
-              <strong>
-                {getIcon(post.category)} {post.title} (
-                {categories.find((cat) => cat.name === post.category)?.name ||
-                  "Unknown"}
-                )
-              </strong>
+              <div className="post-item">
+                <span>{getIcon(post.category)}</span>
+                <strong className="post-title" onClick={() => handlePostClick(post)}>
+                  {post.title}
+                </strong>
+              </div>
               <p>{post.content.substring(0, 40)}...</p>
               {post.images && post.images.length > 0 && (
-                <div>
+                <div className="post-images">
                   {post.images.map((imageUrl, index) => (
                     <img
                       key={index}
                       src={imageUrl}
-                      alt="Post image"
-                      style={{
-                        width: "50px",
-                        height: "50px",
-                        marginRight: "5px",
-                      }}
+                      alt={`Post image ${index + 1}`}
+                      className="post-list-image"
                     />
                   ))}
-                  <EmergencyModal
+                   <EmergencyModal
                     visible={isEmergencyModalVisible}
                     onClose={handleEmergencyModalClose}
                     selectedOption={selectedOption}

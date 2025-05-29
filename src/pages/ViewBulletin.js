@@ -98,13 +98,14 @@ const ViewBulletin = () => {
     };
   }, []);
 
-  // Merge posts with their images
-  const postsWithImages = posts.map((post) => ({
-    ...post,
-    images: imageUrls
-      .filter((imageUrl) => imageUrl.postId === post.id)
-      .map((img) => img.imageUrl),
-  }));
+    const postsWithImages = posts.map((post) => {
+      const postImages = imageUrls.filter((img) => img.postId === post.id).map((img) => img.url);
+      console.log(`Post ${post.id} images:`, postImages);
+      return {
+        ...post,
+        images: postImages,
+      };
+    });
 
   // Function to get category-specific icons (imitating Dashboard.js)
   const getIcon = (cat) => {
@@ -145,10 +146,10 @@ const ViewBulletin = () => {
         {/* Display images if any, imitating Dashboard.js */}
         {post.images && post.images.length > 0 && (
           <div className="post-images">
-            {post.images.map((imageUrl, index) => (
+            {post.images.map((imageUrls, index) => (
               <img
                 key={index}
-                src={imageUrl}
+                src={imageUrls}
                 alt={`Post image ${index + 1}`}
                 className="post-image"
               />

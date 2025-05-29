@@ -5,7 +5,6 @@ export default function PreviewPost({ post, onClose, onEdit, onDelete }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef();
 
-  // Close dropdown if clicked outside
   useEffect(() => {
     function handleClickOutside(event) {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -23,7 +22,7 @@ export default function PreviewPost({ post, onClose, onEdit, onDelete }) {
         onClick={(e) => e.stopPropagation()}
       >
         <button className="close-btn" onClick={onClose} aria-label="Close">
-          &times;
+          ×
         </button>
 
         <div className="ellipsis-menu-wrapper" ref={menuRef}>
@@ -32,7 +31,7 @@ export default function PreviewPost({ post, onClose, onEdit, onDelete }) {
             onClick={() => setMenuOpen((open) => !open)}
             aria-label="Options"
           >
-            &#x22EE; {/* vertical ellipsis */}
+            ⋮
           </button>
 
           {menuOpen && (
@@ -64,23 +63,33 @@ export default function PreviewPost({ post, onClose, onEdit, onDelete }) {
         <div className="preview-details">
           <div>
             <div className="label-text">Category</div>
-            <div className="detail-box">{post.category}</div>
+            <div className="detail-box">{post.category || 'N/A'}</div>
           </div>
 
           <div>
             <div className="label-text">Title</div>
-            <div className="detail-box">{post.title}</div>
+            <div className="detail-box">{post.title || 'No Title'}</div>
           </div>
 
           <div>
             <div className="label-text">Content</div>
-            <div className="detail-box">{post.content}</div>
+            <div className="detail-box">{post.content || 'No Content'}</div>
           </div>
         </div>
 
-        {post.photo && (
-          <div className="preview-image">
-            <img src={post.photo} alt={post.title} />
+        {post.images && post.images.length > 0 && (
+          <div className="preview-images">
+            <div className="label-text">Images</div>
+            <div className="image-container">
+              {post.images.map((imageUrl, index) => (
+                <img
+                  key={index}
+                  src={imageUrl}
+                  alt={`${post.title} image ${index + 1}`}
+                  className="preview-image"
+                />
+              ))}
+            </div>
           </div>
         )}
       </div>

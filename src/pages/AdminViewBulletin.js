@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
-import sidebar from '../assets/BayadBoardLogo.png';
 import '../styles/AdminViewBulletin.css';
 import '../styles/ViewBulletin.css';
+import Sidebar from '../components/sidebar';
 
 const AdminViewBulletin = () => {
   const navigate = useNavigate();
@@ -101,13 +101,14 @@ const AdminViewBulletin = () => {
   }, []);
 
   // Merge posts with their images
-  const postsWithImages = posts.map((post) => ({
-    ...post,
-    images: imageUrls
-      .filter((imageUrl) => imageUrl.postId === post.id)
-      .map((img) => img.imageUrl),
-  }));
-
+    const postsWithImages = posts.map((post) => {
+      const postImages = imageUrls.filter((img) => img.postId === post.id).map((img) => img.url);
+      console.log(`Post ${post.id} images:`, postImages);
+      return {
+        ...post,
+        images: postImages,
+      };
+    });
 
   const getIcon = (cat) => {
     if (!cat) return '📌';
@@ -146,10 +147,10 @@ const AdminViewBulletin = () => {
         </p>
         {post.images && post.images.length > 0 && (
           <div className="post-images">
-            {post.images.map((imageUrl, index) => (
+            {post.images.map((imageUrls, index) => (
               <img
                 key={index}
-                src={imageUrl}
+                src={imageUrls}
                 alt={`Post image ${index + 1}`}
                 className="post-image"
               />
@@ -163,21 +164,7 @@ const AdminViewBulletin = () => {
 
   return (
     <div className="manage-container">
-      <aside className="sidebar">
-        <div className="sidebar-header">
-          <img src={sidebar} alt="BayanBoard Logo" className="sidebar-logo" />
-          <h2 className="logo-text">BayanBoard</h2>
-        </div>
-        <nav>
-          <ul>
-            <li onClick={() => navigate('/Dashboard')}>Dashboard</li>
-            <li onClick={() => navigate('/manage-posts')}>Manage All Posts</li>
-            <li className="active">View Bulletin</li>
-          </ul>
-        </nav>
-        <a href="/" className="logout">Log Out</a>
-      </aside>
-
+      <Sidebar activePage="View Bulletin" />
       <main className="view-main-content">
         <div className="container">
             <h1>VIEW BULLETIN</h1>
