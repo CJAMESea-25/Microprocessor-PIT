@@ -108,7 +108,7 @@ const AdminViewBulletin = () => {
       .map((img) => img.imageUrl),
   }));
 
-  // Function to get category-specific icons
+
   const getIcon = (cat) => {
     if (!cat) return '📌';
     if (cat.includes('Emergency Alerts')) return '🚨';
