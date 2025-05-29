@@ -1,12 +1,14 @@
-import { SearchOutlined, } from "@ant-design/icons";
+import { SearchOutlined } from "@ant-design/icons";
 import { Button, Dropdown, Form, Image, Input, Menu, Select, Space, Upload, message } from "antd";
-import { addDoc, collection, deleteDoc, doc, onSnapshot, updateDoc } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, onSnapshot, updateDoc, setDoc } from "firebase/firestore"; // Added setDoc
 import { useEffect, useState } from "react";
 import { FaBell, FaEllipsisV } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import EmergencyModal from "../components/emergencybtn";
+import { onAuthStateChanged } from "firebase/auth"; // Added for auth check
+import { auth, db } from "../firebase"; // Added auth import
+import DisasterModal from "../components/DisasterBtn";
+import EmergencyModal from "../components/EmergencyBtn";
 import Sidebar from '../components/sidebar';
-import { db } from "../firebase";
 import "../styles/Dashboard.css";
 
 const { TextArea, Search } = Input;
@@ -27,12 +29,8 @@ const SubmitButton = ({ form, isEditMode }) => {
   useEffect(() => {
     form
       .validateFields({ validateOnly: true })
-      .then(() => {
-        setSubmittable(true);
-      })
-      .catch(() => {
-        setSubmittable(false);
-      });
+      .then(() => setSubmittable(true))
+      .catch(() => setSubmittable(false));
   }, [form, values]);
 
   return (
@@ -57,11 +55,24 @@ export default function Dashboard() {
   const [categories, setCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [form] = Form.useForm();
+  const [isDisasterModalVisible, setIsDisasterModalVisible] = useState(false);
   const [isEmergencyModalVisible, setIsEmergencyModalVisible] = useState(false);
+  const [selectedDisaster, setSelectedDisaster] = useState(null);
   const [selectedOption, setSelectedOption] = useState(null);
   const [selectedPost, setSelectedPost] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentMenuKey, setCurrentMenuKey] = useState("");
+
+  // Add authentication check
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        message.error('Please log in');
+        navigate('/login');
+      }
+    });
+    return () => unsubscribe();
+  }, [navigate]);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -141,16 +152,13 @@ export default function Dashboard() {
     }
   };
 
-  const handleChange = ({ fileList: newFileList }) => {
-    setFileList(newFileList);
-  };
+  const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
 
   const getIcon = (cat) => {
     if (!cat) return "📌";
     if (cat.includes("Emergency Alerts")) return "🚨";
     if (cat.includes("General Announcements")) return "📢";
-    if (cat.includes("Community News") || cat.includes("Community Events"))
-      return "📅";
+    if (cat.includes("Community News") || cat.includes("Community Events")) return "📅";
     if (cat.includes("Reminders or Notices")) return "📝";
     return "📌";
   };
@@ -248,7 +256,7 @@ export default function Dashboard() {
     }
   };
 
-const menu = (post) => (
+  const menu = (post) => (
     <Menu>
       <Menu.Item key="edit" onClick={() => handleEditPost(post)}>
         Edit
@@ -260,7 +268,7 @@ const menu = (post) => (
   );
 
   const filteredPosts = posts
-    .filter((post) => post?.title?.toLowerCase().includes(searchTerm.toLowerCase()))
+    .filter((post) => post?.type !== 'emergency' && post?.title?.toLowerCase().includes(searchTerm.toLowerCase()))
     .map((post) => ({
       ...post,
       images: imageUrls.filter((img) => img.postId === post.id).map((img) => img.url),
@@ -272,20 +280,33 @@ const menu = (post) => (
     </button>
   );
 
-  const showEmergencyModal = () => {
-    setIsEmergencyModalVisible(true);
+  const showDisasterModal = () => {
+    setIsDisasterModalVisible(true);
     setSelectedOption(null);
+    setSelectedDisaster(null);
+  };
+
+  const handleDisasterModalClose = () => {
+    setIsDisasterModalVisible(false);
+    setSelectedDisaster(null);
+  };
+
+  const handleDisasterSelect = (disasterId) => {
+    setSelectedDisaster(disasterId);
+    setIsDisasterModalVisible(false);
+    setIsEmergencyModalVisible(true);
   };
 
   const handleEmergencyModalClose = () => {
     setIsEmergencyModalVisible(false);
     setSelectedOption(null);
+    setSelectedDisaster(null);
   };
 
-    const handleCancelEdit = () => {
+  const handleCancelEdit = () => {
     form.resetFields();
     setFileList([]);
-    setIsEditing(false);
+    setIsEditMode(false);
   };
 
   const handlePostClick = (post) => {
@@ -322,7 +343,7 @@ const menu = (post) => (
             <div className="post">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h2>👁️ Preview Post</h2>
-              <Dropdown overlay={() => menu(selectedPost)} trigger={['click']}>
+                <Dropdown overlay={() => menu(selectedPost)} trigger={['click']}>
                   <Button type="link" icon={<FaEllipsisV />} style={{ fontSize: '20px' }} />
                 </Dropdown>
               </div>
@@ -444,7 +465,7 @@ const menu = (post) => (
           <h1>EMERGENCY</h1>
           <button
             className="emergency-btn"
-            onClick={showEmergencyModal}
+            onClick={showDisasterModal}
             type="button"
           >
             <FaBell />
@@ -496,10 +517,15 @@ const menu = (post) => (
             </li>
           ))}
         </ul>
+        <DisasterModal
+          visible={isDisasterModalVisible}
+          onClose={handleDisasterModalClose}
+          onDisasterSelect={handleDisasterSelect}
+        />
         <EmergencyModal
           visible={isEmergencyModalVisible}
           onClose={handleEmergencyModalClose}
-          selectedOption={selectedOption}
+          selectedDisaster={selectedDisaster}
           setSelectedOption={setSelectedOption}
         />
       </section>

@@ -32,21 +32,24 @@ export default function ManagePosts() {
   const [categories, setCategories] = useState(['All']);
   const [sortOrder, setSortOrder] = useState('desc');
 
-  // Fetch posts and imageUrls from Firestore in real-time
   useEffect(() => {
     const unsubscribePosts = onSnapshot(collection(db, 'posts'), (snapshot) => {
-      const fetchedPosts = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        icon: getIcon(doc.data().category),
-        title: doc.data().title,
-        category: doc.data().category,
-        date: new Date(doc.data().timestamp).toLocaleDateString('en-US', {
-          month: '2-digit',
-          day: '2-digit',
-          year: 'numeric',
-        }).replace(/(\d+)\/(\d+)\/(\d+)/, '$1 / $2 / $3'),
-        content: doc.data().content,
-      }));
+      const fetchedPosts = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          icon: getIcon(data.category),
+          title: data.title,
+          category: data.category,
+          type: data.type,
+          date: new Date(data.timestamp).toLocaleDateString('en-US', {
+            month: '2-digit',
+            day: '2-digit',
+            year: 'numeric',
+          }).replace(/(\d+)\/(\d+)\/(\d+)/, '$1 / $2 / $3'),
+          content: data.content,
+        };
+      });
       console.log('Fetched posts from Firestore:', fetchedPosts);
 
       const uniqueCategories = ['All', ...new Set(fetchedPosts.map(post => post.category))].filter(Boolean);
@@ -82,7 +85,7 @@ export default function ManagePosts() {
       unsubscribePosts();
       unsubscribeImages();
     };
-  }, []);
+  }, [imageUrls]);
 
   const handleDeleteClick = (post) => {
     setPostToDelete(post);
@@ -151,9 +154,10 @@ export default function ManagePosts() {
 
   const filteredPosts = posts
     .filter((post) => {
-      const matchesSearch = searchTerm === '' || post.title.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = searchTerm === '' || post.title?.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = selectedCategory === 'All' || post.category === selectedCategory;
-      return matchesSearch && matchesCategory;
+      const isNotEmergency = post?.type !== 'emergency';
+      return matchesSearch && matchesCategory && isNotEmergency;
     })
     .sort((a, b) => {
       const dateA = new Date(a.date.split(' / ').reverse().join('-'));
