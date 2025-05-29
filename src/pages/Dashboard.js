@@ -53,12 +53,7 @@ const SubmitButton = ({ form }) => {
   }, [form, values]);
 
   return (
-    <Button
-      className="post-button"
-      type="primary"
-      htmlType="submit"
-      disabled={!submittable}
-    >
+    <Button className="post-button" type="primary" htmlType="submit" disabled={!submittable}>
       ADD POST
     </Button>
   );
@@ -288,6 +283,13 @@ export default function Dashboard() {
   const handleEmergencyModalClose = () => {
     setIsEmergencyModalVisible(false);
     setSelectedOption(null); // Reset selected option on close
+  };
+   const handlePostClick = (post) => {
+    setSelectedPost(post);
+  };
+
+  const handleBack = () => {
+    setSelectedPost(null);
   };
 
   return (
