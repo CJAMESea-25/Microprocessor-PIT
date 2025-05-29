@@ -2,8 +2,11 @@ import React from 'react';
 import '../styles/LandingPage.css';
 import logo from '../assets/BayadBoardLogo.png';
 import illustration from '../assets/LandingPage.png';
+import { useNavigate } from 'react-router-dom';
 
 const LandingPage = () => {
+  const navigate = useNavigate();
+
   return (
     <div>
       <header>
@@ -23,9 +26,13 @@ const LandingPage = () => {
             guarantee accurate and timely information for everyone.
           </p>
           <div className="buttons">
-            <a href="/view-bulletin" className="btn dark">VIEW BULLETIN</a>
-            <a href="/login" className="btn blue">ADMIN LOGIN</a>
-          </div>
+              <button type="button" className="btn dark" onClick={() => navigate('/view-bulletin')}>
+                VIEW BULLETIN
+              </button>
+              <button type="submit" className="btn blue"onClick={() => navigate('/login')}>
+                ADMIN LOGIN
+              </button>
+            </div>
         </section>
 
         <section className="illustration">
