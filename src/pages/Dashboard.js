@@ -1,11 +1,11 @@
 import { SearchOutlined } from "@ant-design/icons";
 import { Button, Dropdown, Form, Image, Input, Menu, Select, Space, Upload, message } from "antd";
-import { addDoc, collection, deleteDoc, doc, onSnapshot, updateDoc, setDoc } from "firebase/firestore"; // Added setDoc
+import { addDoc, collection, deleteDoc, doc, onSnapshot, updateDoc, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { FaBell, FaEllipsisV } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { onAuthStateChanged } from "firebase/auth"; // Added for auth check
-import { auth, db } from "../firebase"; // Added auth import
+import { onAuthStateChanged } from "firebase/auth";
+import { auth, db } from "../firebase";
 import DisasterModal from "../components/DisasterBtn";
 import EmergencyModal from "../components/EmergencyBtn";
 import Sidebar from '../components/sidebar';
@@ -63,7 +63,6 @@ export default function Dashboard() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentMenuKey, setCurrentMenuKey] = useState("");
 
-  // Add authentication check
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {
@@ -171,7 +170,7 @@ export default function Dashboard() {
 
     try {
       const categoryName = categories.find((cat) => cat.id === values.category)?.name || "";
-      const newPost = {
+      const updatedPostData = {
         category: categoryName,
         title: values.title,
         content: values.description,
@@ -180,11 +179,14 @@ export default function Dashboard() {
 
       if (isEditMode && selectedPost) {
         const postRef = doc(db, "posts", selectedPost.id);
-        await updateDoc(postRef, newPost);
+        await updateDoc(postRef, updatedPostData);
         if (fileList.length > 0) {
           const existingImages = imageUrls.filter((img) => img.postId === selectedPost.id);
-          await Promise.all(existingImages.map((img) => deleteDoc(doc(db, "imageUrls", img.id))));
-          const imagePromises = fileList.map(async (file) => {
+          const currentImageUrls = fileList.map((file) => file.url).filter(Boolean);
+          const imagesToDelete = existingImages.filter((img) => !currentImageUrls.includes(img.url));
+          await Promise.all(imagesToDelete.map((img) => deleteDoc(doc(db, "imageUrls", img.id))));
+          const newImages = fileList.filter((file) => !file.url && file.originFileObj);
+          const imagePromises = newImages.map(async (file) => {
             const base64Image = await getBase64(file.originFileObj);
             return addDoc(collection(db, "imageUrls"), {
               postId: selectedPost.id,
@@ -198,7 +200,7 @@ export default function Dashboard() {
         setIsEditMode(false);
         setSelectedPost(null);
       } else {
-        const postRef = await addDoc(collection(db, "posts"), newPost);
+        const postRef = await addDoc(collection(db, "posts"), updatedPostData);
         if (fileList.length > 0) {
           const imagePromises = fileList.map(async (file) => {
             const base64Image = await getBase64(file.originFileObj);
@@ -235,37 +237,40 @@ export default function Dashboard() {
     }
   };
 
-  const handleEditPost = () => {
-    if (selectedPost) {
-      setIsEditMode(true);
-      form.setFieldsValue({
-        category: categories.find((cat) => cat.name === selectedPost.category)?.id,
-        title: selectedPost.title,
-        description: selectedPost.content,
-      });
-      const postImages = imageUrls
-        .filter((img) => img.postId === selectedPost.id)
-        .map((img, index) => ({
-          uid: `-${index}`,
-          name: `image${index + 1}.png`,
-          status: "done",
-          url: img.url,
-        }));
-      setFileList(postImages);
-      setSelectedPost(null);
-    }
-  };
+    const handleEditPost = (post) => {
+      if (post) {
+        setIsEditMode(true);
+        setSelectedPost(post);
+        form.setFieldsValue({
+          category: categories.find((cat) => cat.name === post.category)?.id,
+          title: post.title,
+          description: post.content,
+        });
+        const postImages = imageUrls
+          .filter((img) => img.postId === post.id)
+          .map((img, index) => ({
+            uid: `-${index}`,
+            name: `image${index + 1}.png`,
+            status: "done",
+            url: img.url,
+          }));
+        setFileList(postImages);
+        setSelectedPost(null);
+      } else {
+        message.error("No post selected for editing");
+      }
+    };
 
-  const menu = (post) => (
-    <Menu>
-      <Menu.Item key="edit" onClick={() => handleEditPost(post)}>
-        Edit
-      </Menu.Item>
-      <Menu.Item key="delete" danger onClick={() => handleDeletePost(post.id)}>
-        Delete
-      </Menu.Item>
-    </Menu>
-  );
+    const menu = (post) => (
+      <Menu>
+        <Menu.Item key="edit" onClick={() => handleEditPost(post)}>
+          Edit
+        </Menu.Item>
+        <Menu.Item key="delete" danger onClick={() => handleDeletePost(post.id)}>
+          Delete
+        </Menu.Item>
+      </Menu>
+    );
 
   const filteredPosts = posts
     .filter((post) => post?.type !== 'emergency' && post?.title?.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -344,41 +349,66 @@ export default function Dashboard() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h2>👁️ Preview Post</h2>
                 <Dropdown overlay={() => menu(selectedPost)} trigger={['click']}>
-                  <Button type="link" icon={<FaEllipsisV />} style={{ fontSize: '20px' }} />
+                  <Button type="link" icon={<FaEllipsisV />} className="ant-dropdown-trigger" />
                 </Dropdown>
               </div>
               <p>
                 You're currently viewing a published post. Use the three-dot
                 menu to edit or delete this post.
               </p>
-              <p>
-                <strong>Title:</strong> {selectedPost.title}
-              </p>
-              <p>
-                <strong>Content:</strong> {selectedPost.content}
-              </p>
-              {selectedPost.images && selectedPost.images.length > 0 && (
-                <div className="preview-image-container">
-                  <strong>Images:</strong>
-                  <div>
-                    {selectedPost.images.map((imageUrl, index) => (
-                      <img
-                        key={index}
-                        src={imageUrl}
-                        alt="Post image"
-                        className="preview-image"
-                      />
-                    ))}
-                  </div>
+              <div className="preview-form">
+                <div className="form-item-spacing">
+                  <label className="ant-form-item-label">Category</label>
+                  <Input
+                    className="custom-select"
+                    value={selectedPost.category}
+                    readOnly
+                  />
                 </div>
-              )}
-              <Button
-                type="primary"
-                onClick={handleBack}
-                className="go-back-button post-button"
-              >
-                GO BACK
-              </Button>
+                <div className="form-item-spacing">
+                  <label className="ant-form-item-label">Title</label>
+                  <Input
+                    className="custom-title"
+                    value={selectedPost.title}
+                    readOnly
+                  />
+                </div>
+                <div className="form-item-spacing">
+                  <label className="ant-form-item-label">Description</label>
+                  <TextArea
+                    className="custom-description"
+                    value={selectedPost.content}
+                    autoSize={{ minRows: 3, maxRows: 10 }}
+                    readOnly
+                  />
+                </div>
+                {selectedPost.images && selectedPost.images.length > 0 && (
+                  <div className="form-item-spacing">
+                    <label className="ant-form-item-label">Images</label>
+                    <div className="preview-images">
+                      <div className="image-container">
+                        {selectedPost.images.map((imageUrl, index) => (
+                          <img
+                            key={index}
+                            src={imageUrl}
+                            alt={`Post image ${index + 1}`}
+                            className="preview-image"
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div className="form-item-spacing">
+                  <Button
+                    type="primary"
+                    onClick={handleBack}
+                    className="post-button"
+                  >
+                    GO BACK
+                  </Button>
+                </div>
+              </div>
             </div>
           ) : (
             <div className="post">
