@@ -33,8 +33,6 @@ header .logo-section img {
   /*margin-top: 1.5rem; */
 }
 
-/* Title */
-
 /* Title Bar */
 .title-bar {
   max-width: 1200px; /* Match board-container width */
@@ -189,6 +187,8 @@ header .logo-section img {
   line-height: 1.5;
   color: #555;
   margin-top: 20px;
+  word-break: break-word; /* Break long words to prevent overflow */
+  overflow-wrap: anywhere; /* Ensure text wraps within the container */
 }
 
 .content-container {

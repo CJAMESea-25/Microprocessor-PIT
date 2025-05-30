@@ -1,4 +1,4 @@
-import { Modal, Button, message } from 'antd';
+import { Button, Modal } from 'antd';
 import '../styles/EmergencyBtn.css';
 
 export default function DisasterModal({

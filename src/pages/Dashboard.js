@@ -1,14 +1,14 @@
-import { SearchOutlined } from "@ant-design/icons";
+import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import { Button, Dropdown, Form, Image, Input, Menu, Select, Space, Upload, message } from "antd";
-import { addDoc, collection, deleteDoc, doc, onSnapshot, updateDoc, setDoc } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
+import { addDoc, collection, deleteDoc, doc, onSnapshot, updateDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { FaBell, FaEllipsisV } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth, db } from "../firebase";
 import DisasterModal from "../components/DisasterBtn";
 import EmergencyModal from "../components/EmergencyBtn";
-import Sidebar from '../components/sidebar';
+import Sidebar from "../components/sidebar";
+import { auth, db } from "../firebase";
 import "../styles/Dashboard.css";
 
 const { TextArea, Search } = Input;
@@ -62,12 +62,13 @@ export default function Dashboard() {
   const [selectedPost, setSelectedPost] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentMenuKey, setCurrentMenuKey] = useState("");
+  const [editedPost, setEditedPost] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {
-        message.error('Please log in');
-        navigate('/login');
+        message.error("Please log in");
+        navigate("/login");
       }
     });
     return () => unsubscribe();
@@ -151,7 +152,31 @@ export default function Dashboard() {
     }
   };
 
-  const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
+  const handleChange = async ({ fileList: newFileList }) => {
+    const updatedFileList = await Promise.all(
+      newFileList.map(async (file) => {
+        if (file.originFileObj && !file.url && !file.preview) {
+          const preview = await getBase64(file.originFileObj);
+          return { ...file, preview };
+        }
+        return file;
+      })
+    );
+    setFileList(updatedFileList);
+  };
+
+  const handleRemove = async (file) => {
+    try {
+      if (file.id) {
+        await deleteDoc(doc(db, "imageUrls", file.id));
+        message.success("Image deleted successfully");
+      }
+      return true;
+    } catch (error) {
+      message.error("Failed to delete image");
+      return false;
+    }
+  };
 
   const getIcon = (cat) => {
     if (!cat) return "📌";
@@ -162,7 +187,7 @@ export default function Dashboard() {
     return "📌";
   };
 
-  const handleAddPost = async (values) => {
+  const handleFormFinish = async (values) => {
     if (!values.category || !values.title || !values.description) {
       message.error("Please fill out all required fields");
       return;
@@ -170,40 +195,47 @@ export default function Dashboard() {
 
     try {
       const categoryName = categories.find((cat) => cat.id === values.category)?.name || "";
-      const updatedPostData = {
+      const postData = {
         category: categoryName,
         title: values.title,
         content: values.description,
         timestamp: new Date().toISOString(),
       };
 
-      if (isEditMode && selectedPost) {
-        const postRef = doc(db, "posts", selectedPost.id);
-        await updateDoc(postRef, updatedPostData);
-        if (fileList.length > 0) {
-          const existingImages = imageUrls.filter((img) => img.postId === selectedPost.id);
-          const currentImageUrls = fileList.map((file) => file.url).filter(Boolean);
-          const imagesToDelete = existingImages.filter((img) => !currentImageUrls.includes(img.url));
-          await Promise.all(imagesToDelete.map((img) => deleteDoc(doc(db, "imageUrls", img.id))));
-          const newImages = fileList.filter((file) => !file.url && file.originFileObj);
+      if (isEditMode && editedPost) {
+        const postRef = doc(db, "posts", editedPost.id);
+        await updateDoc(postRef, postData);
+
+        // Handle image updates
+        const existingImages = imageUrls.filter((img) => img.postId === editedPost.id);
+        const currentImageUrls = fileList.map((file) => file.url).filter(Boolean);
+        const imagesToDelete = existingImages.filter((img) => !currentImageUrls.includes(img.url));
+        await Promise.all(imagesToDelete.map((img) => deleteDoc(doc(db, "imageUrls", img.id))));
+
+        const newImages = fileList.filter((file) => !file.id && file.originFileObj);
+        if (newImages.length > 0) {
           const imagePromises = newImages.map(async (file) => {
-            const base64Image = await getBase64(file.originFileObj);
+            const base64Image = file.url || file.preview || (await getBase64(file.originFileObj));
             return addDoc(collection(db, "imageUrls"), {
-              postId: selectedPost.id,
+              postId: editedPost.id,
               url: base64Image,
               createdAt: new Date().toISOString(),
             });
           });
           await Promise.all(imagePromises);
         }
+
         message.success("Post updated successfully");
-        setIsEditMode(false);
-        setSelectedPost(null);
+        setPosts((prevPosts) =>
+          prevPosts.map((post) =>
+            post.id === editedPost.id ? { ...post, ...postData } : post
+          )
+        );
       } else {
-        const postRef = await addDoc(collection(db, "posts"), updatedPostData);
+        const postRef = await addDoc(collection(db, "posts"), postData);
         if (fileList.length > 0) {
           const imagePromises = fileList.map(async (file) => {
-            const base64Image = await getBase64(file.originFileObj);
+            const base64Image = file.url || file.preview || (await getBase64(file.originFileObj));
             return addDoc(collection(db, "imageUrls"), {
               postId: postRef.id,
               url: base64Image,
@@ -215,6 +247,9 @@ export default function Dashboard() {
         message.success("Post added successfully");
       }
 
+      setIsEditMode(false);
+      setEditedPost(null);
+      setSelectedPost(null);
       form.resetFields();
       setFileList([]);
     } catch (error) {
@@ -237,52 +272,54 @@ export default function Dashboard() {
     }
   };
 
-    const handleEditPost = (post) => {
-      if (post) {
-        setIsEditMode(true);
-        setSelectedPost(post);
-        form.setFieldsValue({
-          category: categories.find((cat) => cat.name === post.category)?.id,
-          title: post.title,
-          description: post.content,
-        });
-        const postImages = imageUrls
-          .filter((img) => img.postId === post.id)
-          .map((img, index) => ({
-            uid: `-${index}`,
-            name: `image${index + 1}.png`,
-            status: "done",
-            url: img.url,
-          }));
-        setFileList(postImages);
-        setSelectedPost(null);
-      } else {
-        message.error("No post selected for editing");
-      }
-    };
+  const handleEditPost = (post) => {
+    if (post) {
+      setIsEditMode(true);
+      setSelectedPost(null);
+      setEditedPost(post);
+      form.setFieldsValue({
+        category: categories.find((cat) => cat.name === post.category)?.id,
+        title: post.title,
+        description: post.content,
+      });
+      const postImages = imageUrls
+        .filter((img) => img.postId === post.id)
+        .map((img, index) => ({
+          id: img.id,
+          uid: img.id,
+          name: `image-${index + 1}.png`,
+          status: "done",
+          url: img.url,
+        }));
+      setFileList(postImages);
+    } else {
+      message.error("No post selected for editing");
+    }
+  };
 
-    const menu = (post) => (
-      <Menu>
-        <Menu.Item key="edit" onClick={() => handleEditPost(post)}>
-          Edit
-        </Menu.Item>
-        <Menu.Item key="delete" danger onClick={() => handleDeletePost(post.id)}>
-          Delete
-        </Menu.Item>
-      </Menu>
-    );
+  const menu = (post) => (
+    <Menu>
+      <Menu.Item key="edit" onClick={() => handleEditPost(post)}>
+        Edit
+      </Menu.Item>
+      <Menu.Item key="delete" danger onClick={() => handleDeletePost(post.id)}>
+        Delete
+      </Menu.Item>
+    </Menu>
+  );
 
   const filteredPosts = posts
-    .filter((post) => post?.type !== 'emergency' && post?.title?.toLowerCase().includes(searchTerm.toLowerCase()))
+    .filter((post) => post?.type !== "emergency" && post?.title?.toLowerCase().includes(searchTerm.toLowerCase()))
     .map((post) => ({
       ...post,
       images: imageUrls.filter((img) => img.postId === post.id).map((img) => img.url),
     }));
 
   const uploadButton = (
-    <button className="upload-button" type="button">
-      <div className="upload-button-text">Upload Image</div>
-    </button>
+    <div className="upload-card">
+      <PlusOutlined />
+      <div style={{ marginTop: 8 }}>Upload</div>
+    </div>
   );
 
   const showDisasterModal = () => {
@@ -312,6 +349,7 @@ export default function Dashboard() {
     form.resetFields();
     setFileList([]);
     setIsEditMode(false);
+    setEditedPost(null);
   };
 
   const handlePostClick = (post) => {
@@ -319,6 +357,7 @@ export default function Dashboard() {
     setIsEditMode(false);
     form.resetFields();
     setFileList([]);
+    setEditedPost(null);
   };
 
   const handleBack = () => {
@@ -326,6 +365,7 @@ export default function Dashboard() {
     setIsEditMode(false);
     form.resetFields();
     setFileList([]);
+    setEditedPost(null);
   };
 
   return (
@@ -346,32 +386,21 @@ export default function Dashboard() {
           <h1>DASHBOARD</h1>
           {selectedPost ? (
             <div className="post">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h2>👁️ Preview Post</h2>
-                <Dropdown overlay={() => menu(selectedPost)} trigger={['click']}>
+                <Dropdown overlay={() => menu(selectedPost)} trigger={["click"]}>
                   <Button type="link" icon={<FaEllipsisV />} className="ant-dropdown-trigger" />
                 </Dropdown>
-              </div>
               <p>
-                You're currently viewing a published post. Use the three-dot
-                menu to edit or delete this post.
+                You're currently viewing a published post. Use the three-dot menu to edit or delete this post.
               </p>
               <div className="preview-form">
                 <div className="form-item-spacing">
                   <label className="ant-form-item-label">Category</label>
-                  <Input
-                    className="custom-select"
-                    value={selectedPost.category}
-                    readOnly
-                  />
+                  <Input className="custom-select" value={selectedPost.category} readOnly />
                 </div>
                 <div className="form-item-spacing">
                   <label className="ant-form-item-label">Title</label>
-                  <Input
-                    className="custom-title"
-                    value={selectedPost.title}
-                    readOnly
-                  />
+                  <Input className="custom-title" value={selectedPost.title} readOnly />
                 </div>
                 <div className="form-item-spacing">
                   <label className="ant-form-item-label">Description</label>
@@ -400,11 +429,7 @@ export default function Dashboard() {
                   </div>
                 )}
                 <div className="form-item-spacing">
-                  <Button
-                    type="primary"
-                    onClick={handleBack}
-                    className="post-button"
-                  >
+                  <Button type="primary" onClick={handleBack} className="post-button">
                     GO BACK
                   </Button>
                 </div>
@@ -418,55 +443,53 @@ export default function Dashboard() {
                   ? "Edit the post details below. All changes will be updated on the public board after submission."
                   : "Fill out the form below to publish a new bulletin post. All posts will be displayed on the public board after submission. Photo upload is optional."}
               </p>
-              <Form
-                form={form}
-                layout="vertical"
-                autoComplete="off"
-                onFinish={handleAddPost}
-              >
-                <Form.Item
-                  name="category"
-                  className="form-item-spacing"
-                  rules={[{ required: true, message: "Category is required" }]}
-                >
-                  <Select
-                    className="custom-select"
-                    placeholder="Select a category"
-                    loading={!categories.length}
+              <Form form={form} layout="vertical" autoComplete="off" onFinish={handleFormFinish}>
+                <div className="form-item-spacing">
+                  <label className="ant-form-item-label">Category</label>
+                  <Form.Item
+                    name="category"
+                    rules={[{ required: true, message: "Category is required" }]}
                   >
-                    {categories.map((category) => (
-                      <Option key={category.id} value={category.id}>
-                        {category.name}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-                <Form.Item
-                  name="title"
-                  className="form-item-spacing"
-                  rules={[{ required: true, message: "Title is required" }]}
-                >
-                  <Input className="custom-title" placeholder="Title" />
-                </Form.Item>
-                <Form.Item
-                  name="description"
-                  className="form-item-spacing"
-                  rules={[{ required: true, message: "Description is required" }]}
-                >
-                  <TextArea
-                    className="custom-description"
-                    placeholder="Description..."
-                    autoSize={{ minRows: 3, maxRows: 10 }}
-                  />
-                </Form.Item>
-                <Form.Item className="form-item-upload-spacing">
+                    <Select className="custom-select" placeholder="Select a category" loading={!categories.length}>
+                      {categories.map((category) => (
+                        <Option key={category.id} value={category.id}>
+                          {category.name}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </div>
+                <div className="form-item-spacing">
+                  <label className="ant-form-item-label">Title</label>
+                  <Form.Item
+                    name="title"
+                    rules={[{ required: true, message: "Title is required" }]}
+                  >
+                    <Input className="custom-title" placeholder="Title" />
+                  </Form.Item>
+                </div>
+                <div className="form-item-spacing">
+                  <label className="ant-form-item-label">Description</label>
+                  <Form.Item
+                    name="description"
+                    rules={[{ required: true, message: "Description is required" }]}
+                  >
+                    <TextArea
+                      className="custom-description"
+                      placeholder="Description..."
+                      autoSize={{ minRows: 3, maxRows: 10 }}
+                    />
+                  </Form.Item>
+                </div>
+                <Form.Item className="form-item-spacing">
+                  <div className="label-text">Photos</div>
                   <Upload
-                    className="custom-upload"
-                    listType="picture"
+                    listType="picture-card"
                     fileList={fileList}
                     beforeUpload={() => false}
                     onPreview={handlePreview}
                     onChange={handleChange}
+                    onRemove={handleRemove}
                   >
                     {fileList.length >= 5 ? null : uploadButton}
                   </Upload>
@@ -483,7 +506,14 @@ export default function Dashboard() {
                   )}
                 </Form.Item>
                 <Form.Item className="form-item-spacing">
-                  <SubmitButton form={form} isEditMode={isEditMode} />
+                  <Space direction="horizontal" align="start" size={16}>
+                    {isEditMode && (
+                      <Button className="cancel-button1" type="primary" onClick={handleCancelEdit}>
+                        CANCEL
+                      </Button>
+                    )}
+                    <SubmitButton form={form} isEditMode={isEditMode} />
+                  </Space>
                 </Form.Item>
               </Form>
             </div>
@@ -493,11 +523,7 @@ export default function Dashboard() {
       <section className="post-section">
         <div className="emerg-button">
           <h1>EMERGENCY</h1>
-          <button
-            className="emergency-btn"
-            onClick={showDisasterModal}
-            type="button"
-          >
+          <button className="emergency-btn" onClick={showDisasterModal} type="button">
             <FaBell />
           </button>
         </div>
@@ -537,13 +563,6 @@ export default function Dashboard() {
                   ))}
                 </div>
               )}
-              <Button
-                type="link"
-                danger
-                onClick={() => handleDeletePost(post.id)}
-              >
-                Delete
-              </Button>
             </li>
           ))}
         </ul>

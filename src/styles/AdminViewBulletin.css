@@ -1,9 +1,10 @@
+/* AdminViewBulletin.css */
+
 body {
   margin: 0;
   background-color: #f8f9fa;
-   height: 100%;
+  height: 100%;
   padding: 0;
-  
 }
 
 .manage-container {
@@ -11,35 +12,118 @@ body {
   min-height: 100vh;
 }
 
-.view-main-content{
+.view-main-content {
   padding: 1rem;
   height: 100%;
-  width: 100% ;
-  overflow-y: auto;    
-  overflow-x: hidden;  
-
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
+
 .container {
   min-height: 90vh;
-    border-radius: 40px;
+  border-radius: 40px;
 }
-.container h1{
+
+.container h1 {
   color: black;
 }
-.content-container{
+
+.content-container {
   background-color: white;
   padding: 2rem;
   border-radius: 20px;
   height: 100%;
   margin-top: -20px;
   overflow-y: auto;
-}
-.post-date {
-  font-size: 0.9rem;
-  color: #888;
-}
-.title-text {
-  border-radius: 30px;
-  height: 100%;
+  overflow-x: hidden; /* Prevent horizontal overflow */
 }
 
+/* Add post-box styling */
+.post-box {
+  background: #f9f9f9;
+  border: 2px solid black;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.05);
+  text-align: justify;
+  overflow-x: hidden; /* Prevent horizontal overflow */
+  word-wrap: break-word; /* Break long words */
+}
+
+/* Add post-main-content styling */
+.post-main-content {
+  font-size: 0.9em;
+  line-height: 1.5;
+  color: #555;
+  margin-top: 20px;
+  word-break: break-word; /* Break long words */
+  overflow-wrap: anywhere; /* Ensure text wraps properly */
+}
+
+/* Add post-images styling */
+.post-images {
+  max-width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+/* Add post-image styling */
+.post-image {
+  max-width: 100%;
+  width: 100%; /* Ensure image takes full available width */
+  height: auto;
+  object-fit: contain; /* Use contain to avoid cropping */
+  border-radius: 4px;
+}
+
+/* Add category-grid styling */
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  padding: 10px 0;
+}
+
+/* Category Section */
+.category-section {
+  margin-top: 0;
+  margin-bottom: 3rem;
+}
+
+.category-section h3 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #000;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #aaa;
+  padding-bottom: 0.5rem;
+}
+
+/* Post Author */
+.post-author {
+  display: block;
+  text-align: right;
+  font-size: 0.75em;
+  color: #999;
+  margin-top: 10px;
+}
+
+/* Loading and Error Messages */
+.loading-message,
+.error-message,
+.no-posts-message {
+  text-align: center;
+  padding: 20px;
+  font-size: 1.1em;
+  color: #666;
+}
+
+.error-message {
+  color: #d9534f; /* Red for errors */
+  font-weight: bold;
+}
