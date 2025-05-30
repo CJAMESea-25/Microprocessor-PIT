@@ -84,15 +84,13 @@ export default function EmergencyModal({
       }
 
       await updateDoc(docRef, {
-        active: true,
-        timestamp: new Date().toISOString(),
-      });
+        active: true,      });
 
       message.success(`Activated ${selectedDisaster} ${level} warning`);
       setTimeout(() => {
         setSelectedLevel(null); // Reset selection
         onClose(); // Close modal after slight delay for feedback
-      }, 500); // 500ms delay to ensure success message is visible
+      }, 200); // 500ms delay to ensure success message is visible
     } catch (error) {
       message.error(`Failed to update Firestore: ${error.message}`);
     }
