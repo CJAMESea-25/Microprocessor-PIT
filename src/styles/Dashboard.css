@@ -217,10 +217,10 @@ body {
   max-height: 100vh;
   overflow-y: auto;
   overflow: hidden;
-  white-space: nowrap; /* Prevent text wrapping */
-  overflow: hidden; /* Hide overflowing text */
-  text-overflow: ellipsis; /* Add ellipsis for truncated text */
-  max-width: 100%; /* Ensure text stays within container */
+  white-space: nowrap; 
+  overflow: hidden;
+  text-overflow: ellipsis; 
+  max-width: 100%; 
 }
 
 .post-list li {
