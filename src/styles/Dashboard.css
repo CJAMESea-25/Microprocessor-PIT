@@ -88,9 +88,15 @@ body {
 }
 
 .post h2 {
-  font-size: 24px;
+  font-size: 18px;
   font-family: "Inter", sans-serif;
   font-weight: bolder;
+  padding-bottom: 20px;
+  padding-left: 48px;
+  white-space: nowrap; /* Prevent text wrapping */
+  overflow: hidden; /* Hide overflowing text */
+  text-overflow: ellipsis; /* Add ellipsis for truncated text */
+  max-width: 100%; /* Ensure text stays within container */
 }
 
 .custom-select .ant-select-selector,
@@ -196,7 +202,7 @@ body {
   background-color: white;
   padding-left: 1rem;
   padding-right: 1rem;
-  width: 500px;
+  width: 400px;
   max-height: 100vh;
 }
 
@@ -207,6 +213,24 @@ body {
   font-size: 18px;
 }
 
+.post-section h2 {
+  font-family: "Inter", sans-serif;
+  font-weight: bolder;
+  padding-bottom: 20px;
+  padding-left: 48px;
+  white-space: nowrap; /* Prevent text wrapping */
+  overflow: hidden; /* Hide overflowing text */
+  text-overflow: ellipsis; /* Add ellipsis for truncated text */
+  max-width: 100%; /* Ensure text stays within container */
+}
+
+.post-section p {
+  white-space: nowrap; /* Prevent text wrapping */
+  overflow: hidden; /* Hide overflowing text */
+  text-overflow: ellipsis; /* Add ellipsis for truncated text */
+  max-width: 100%; /* Ensure text stays within container */
+}
+
 .post-list {
   list-style: none;
   margin-top: 20px;
@@ -214,6 +238,7 @@ body {
   width: 100%;
   max-height: 100vh;
   overflow-y: auto;
+  overflow: hidden;
 }
 
 .post-list li {
@@ -458,6 +483,16 @@ body {
   position: relative;
 }
 
+.post p {
+  font-size: 18px;
+  padding-bottom: 20px;
+  padding-left: 48px;
+  white-space: nowrap; /* Prevent text wrapping */
+  overflow: hidden; /* Hide overflowing text */
+  text-overflow: ellipsis; /* Add ellipsis for truncated text */
+  max-width: 100%; /* Ensure text stays within container */
+}
+
 /* Post Button Styling (ADD POST / UPDATE POST / GO BACK) */
 .post-button {
   background-color: #0066ff;
@@ -514,7 +549,6 @@ body {
   outline: 2px solid gray;
   outline-offset: 2px;
 }
-
 
 .post-list .ant-btn-link.ant-btn-dangerous {
   color: #ff4d4f; 
@@ -580,6 +614,7 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
+  text-overflow: ellipsis;
 }
 
 .post-title {
@@ -594,7 +629,6 @@ body {
   margin-right: 5px;
 }
 
-/* Responsive adjustments for buttons */
 @media (max-width: 600px) {
   .post-button,
   .cancel-button1 {
