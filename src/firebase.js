@@ -4,12 +4,12 @@ import { getFirestore } from 'firebase/firestore';
 import {getStorage} from 'firebase/storage';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBckfZmUPQsQBjOfZ5e51j7tocZKkKFf74",
-  authDomain: "microprocessor-pit-914bc.firebaseapp.com",
-  projectId: "microprocessor-pit-914bc",
-  storageBucket: "microprocessor-pit-914bc.appspot.com",
-  messagingSenderId: "518807869338",
-  appId: "1:518807869338:web:f26ea511b5446313508c23"
+  apiKey: "AIzaSyDlzhu_eSDIMehcoB9tbQvqD9_2DU-gC9g",
+  authDomain: "micropit2.firebaseapp.com",
+  projectId: "micropit2",
+  storageBucket: "micropit2.firebasestorage.app",
+  messagingSenderId: "520952971688",
+  appId: "1:520952971688:web:cb3b48d5030a414f729d9d"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -20,4 +20,3 @@ const storage = getStorage(app);
 
 
 export { auth, db, storage };
-
