@@ -1,9 +1,9 @@
-import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import logo from '../assets/BayadBoardLogo.png';
-import { db } from '../firebase';
 import '../styles/ViewBulletin.css';
+import React, { useState, useEffect } from 'react';
+import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { db } from '../firebase';
 
 const ViewBulletin = () => {
   const [posts, setPosts] = useState([]);
@@ -98,14 +98,13 @@ const ViewBulletin = () => {
     };
   }, []);
 
-    const postsWithImages = posts.map((post) => {
-      const postImages = imageUrls.filter((img) => img.postId === post.id).map((img) => img.url);
-      console.log(`Post ${post.id} images:`, postImages);
-      return {
-        ...post,
-        images: postImages,
-      };
-    });
+  // Merge posts with their images
+  const postsWithImages = posts.map((post) => ({
+    ...post,
+    images: imageUrls
+      .filter((imageUrl) => imageUrl.postId === post.id)
+      .map((img) => img.imageUrl),
+  }));
 
   // Function to get category-specific icons (imitating Dashboard.js)
   const getIcon = (cat) => {
@@ -146,10 +145,10 @@ const ViewBulletin = () => {
         {/* Display images if any, imitating Dashboard.js */}
         {post.images && post.images.length > 0 && (
           <div className="post-images">
-            {post.images.map((imageUrls, index) => (
+            {post.images.map((imageUrl, index) => (
               <img
                 key={index}
-                src={imageUrls}
+                src={imageUrl}
                 alt={`Post image ${index + 1}`}
                 className="post-image"
               />

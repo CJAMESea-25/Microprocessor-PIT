@@ -77,7 +77,6 @@ body {
   gap: 1rem;
 }
 
-
 .container h1 {
   font-size: 50px;
   font-family: "Inter", sans-serif;
@@ -94,10 +93,6 @@ body {
   font-weight: bolder;
   padding-bottom: 20px;
   padding-left: 48px;
-  white-space: nowrap; /* Prevent text wrapping */
-  overflow: hidden; /* Hide overflowing text */
-  text-overflow: ellipsis; /* Add ellipsis for truncated text */
-  max-width: 100%; /* Ensure text stays within container */
 }
 
 .custom-select .ant-select-selector,
@@ -214,24 +209,6 @@ body {
   font-size: 18px;
 }
 
-.post-section h2 {
-  font-family: "Inter", sans-serif;
-  font-weight: bolder;
-  padding-bottom: 20px;
-  padding-left: 48px;
-  white-space: nowrap; /* Prevent text wrapping */
-  overflow: hidden; /* Hide overflowing text */
-  text-overflow: ellipsis; /* Add ellipsis for truncated text */
-  max-width: 100%; /* Ensure text stays within container */
-}
-
-.post-section p {
-  white-space: nowrap; /* Prevent text wrapping */
-  overflow: hidden; /* Hide overflowing text */
-  text-overflow: ellipsis; /* Add ellipsis for truncated text */
-  max-width: 100%; /* Ensure text stays within container */
-}
-
 .post-list {
   list-style: none;
   margin-top: 20px;
@@ -240,10 +217,21 @@ body {
   max-height: 100vh;
   overflow-y: auto;
   overflow: hidden;
+  white-space: nowrap; /* Prevent text wrapping */
+  overflow: hidden; /* Hide overflowing text */
+  text-overflow: ellipsis; /* Add ellipsis for truncated text */
+  max-width: 100%; /* Ensure text stays within container */
 }
 
 .post-list li {
   margin-bottom: 1rem;
+}
+
+.post-list li p{
+  white-space: nowrap; /* Prevent text wrapping */
+  overflow: hidden; /* Hide overflowing text */
+  text-overflow: ellipsis; /* Add ellipsis for truncated text */
+  max-width: 100%; /* Ensure text stays within container */
 }
 
 .emerg-button {
@@ -484,16 +472,11 @@ body {
   position: relative;
 }
 
-.post p {
+.post p{
   font-size: 18px;
   padding-bottom: 20px;
   padding-left: 48px;
-  white-space: nowrap; /* Prevent text wrapping */
-  overflow: hidden; /* Hide overflowing text */
-  text-overflow: ellipsis; /* Add ellipsis for truncated text */
-  max-width: 100%; /* Ensure text stays within container */
 }
-
 /* Post Button Styling (ADD POST / UPDATE POST / GO BACK) */
 .post-button {
   background-color: #0066ff;
@@ -550,6 +533,7 @@ body {
   outline: 2px solid gray;
   outline-offset: 2px;
 }
+
 
 .post-list .ant-btn-link.ant-btn-dangerous {
   color: #ff4d4f; 
@@ -615,12 +599,24 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  text-overflow: ellipsis;
 }
+
+.post-list p{
+  white-space: nowrap; /* Prevent text wrapping */
+  overflow: hidden; /* Hide overflowing text */
+  text-overflow: ellipsis; /* Add ellipsis for truncated text */
+  max-width: 100%; /* Ensure text stays within container */
+}
+
+
 
 .post-title {
   cursor: pointer;
   color: #0066ff;
+    white-space: nowrap; /* Prevent text wrapping */
+  overflow: hidden; /* Hide overflowing text */
+  text-overflow: ellipsis; /* Add ellipsis for truncated text */
+  max-width: 100%; /* Ensure text stays within container */
 }
 
 .post-list-image {
@@ -630,6 +626,7 @@ body {
   margin-right: 5px;
 }
 
+/* Responsive adjustments for buttons */
 @media (max-width: 600px) {
   .post-button,
   .cancel-button1 {
