@@ -1,6 +1,6 @@
-import { Modal, message, Button } from 'antd';
-import { useEffect, useState } from 'react';
+import { Button, Modal, message } from 'antd';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
 import { db } from '../firebase';
 import '../styles/EmergencyBtn.css';
 
@@ -22,9 +22,9 @@ export default function EmergencyModal({
 
     const fetchMessages = async () => {
       try {
-        const redDoc = await getDoc(doc(db, 'posts', `${selectedDisaster}Red`));
-        const yellowDoc = await getDoc(doc(db, 'posts', `${selectedDisaster}Yellow`));
-        const greenDoc = await getDoc(doc(db, 'posts', `${selectedDisaster}Green`));
+        const redDoc = await getDoc(doc(db, 'emergencies', `${selectedDisaster}Red`));
+        const yellowDoc = await getDoc(doc(db, 'emergencies', `${selectedDisaster}Yellow`));
+        const greenDoc = await getDoc(doc(db, 'emergencies', `${selectedDisaster}Green`));
 
         setMessages({
           red: redDoc.exists() ? redDoc.data() : { title: '', content: '' },
@@ -66,7 +66,7 @@ export default function EmergencyModal({
       const levels = ['Red', 'Yellow', 'Green'];
       for (const disaster of disasterIds) {
         for (const lvl of levels) {
-          const docRef = doc(db, 'posts', `${disaster}${lvl}`);
+          const docRef = doc(db, 'emergencies', `${disaster}${lvl}`);
           const docSnap = await getDoc(docRef);
           if (docSnap.exists()) {
             await updateDoc(docRef, { active: false });
@@ -76,7 +76,7 @@ export default function EmergencyModal({
 
       // Activate the selected message
       const docId = `${selectedDisaster}${level.charAt(0).toUpperCase() + level.slice(1)}`;
-      const docRef = doc(db, 'posts', docId);
+      const docRef = doc(db, 'emergencies', docId);
       const docSnap = await getDoc(docRef);
       if (!docSnap.exists()) {
         message.error(`Emergency post ${docId} does not exist in Firestore.`);
@@ -84,15 +84,13 @@ export default function EmergencyModal({
       }
 
       await updateDoc(docRef, {
-        active: true,
-        timestamp: new Date().toISOString(),
-      });
+        active: true,      });
 
       message.success(`Activated ${selectedDisaster} ${level} warning`);
       setTimeout(() => {
         setSelectedLevel(null); // Reset selection
         onClose(); // Close modal after slight delay for feedback
-      }, 500); // 500ms delay to ensure success message is visible
+      }, 200); // 500ms delay to ensure success message is visible
     } catch (error) {
       message.error(`Failed to update Firestore: ${error.message}`);
     }

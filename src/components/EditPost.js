@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import { collection, onSnapshot, doc, updateDoc, addDoc, deleteDoc } from 'firebase/firestore';
-import { message, Upload, Button } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
+import { message, Upload } from 'antd';
+import { addDoc, collection, deleteDoc, doc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
 import { db } from '../firebase';
 import '../styles/EditPost.css';
 
@@ -33,9 +33,8 @@ export default function EditPost({ post, onClose, onSave }) {
         setCategories([
           { id: 'cat1', name: 'Emergency Alerts' },
           { id: 'cat2', name: 'General Announcements' },
-          { id: 'cat3', name: 'Community News' },
+          { id: 'cat3', name: 'Community Events' },
           { id: 'cat4', name: 'Reminders or Notices' },
-          { id: 'cat5', name: 'Community Events' },
         ]);
       }
     }, (error) => {

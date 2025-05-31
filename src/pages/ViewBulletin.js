@@ -1,9 +1,9 @@
+import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import logo from '../assets/BayadBoardLogo.png';
-import '../styles/ViewBulletin.css';
-import React, { useState, useEffect } from 'react';
-import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
+import '../styles/ViewBulletin.css';
 
 const ViewBulletin = () => {
   const [posts, setPosts] = useState([]);

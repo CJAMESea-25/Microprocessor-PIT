@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import Sidebar from '../components/sidebar';
 import { db } from '../firebase';
 import '../styles/AdminViewBulletin.css';
 import '../styles/ViewBulletin.css';
-import Sidebar from '../components/sidebar';
 
 const AdminViewBulletin = () => {
   const navigate = useNavigate();
@@ -91,7 +91,7 @@ const AdminViewBulletin = () => {
       setImageUrls(fetchedImageUrls);
     }, (error) => {
       console.error('Error fetching imageUrls:', error.message, 'Code:', error.code);
-      setErrorerror.setError('Failed to load images: ' + error.message);
+      setError('Failed to load images: ' + error.message); // Fixed line
     });
 
     return () => {
@@ -100,7 +100,7 @@ const AdminViewBulletin = () => {
     };
   }, []);
 
-  // Merge posts with their images
+    // Merge posts with their images
     const postsWithImages = posts.map((post) => {
       const postImages = imageUrls.filter((img) => img.postId === post.id).map((img) => img.url);
       console.log(`Post ${post.id} images:`, postImages);
@@ -153,6 +153,7 @@ const AdminViewBulletin = () => {
                 src={imageUrls}
                 alt={`Post image ${index + 1}`}
                 className="post-image"
+                loading="lazy"
               />
             ))}
           </div>
@@ -167,44 +168,43 @@ const AdminViewBulletin = () => {
       <Sidebar activePage="View Bulletin" />
       <main className="view-main-content">
         <div className="container">
-            <h1>VIEW BULLETIN</h1>
-        {loading ? (
-          <div className="content-container">
-            <p className="loading-message">Loading bulletin board...</p>
-          </div>
-        ) : error ? (
-          <div className="content-container">
-            <p className="error-message">{error}</p>
-          </div>
-        ) : (
-          <div className="content-container">
-            {categories.map((category) => {
-              const categoryPosts = postsWithImages.filter((post) => post.category === category.name);
-              if (categoryPosts.length === 0) return null;
+          <h1>VIEW BULLETIN</h1>
+          {loading ? (
+            <div className="content-container">
+              <p className="loading-message">Loading bulletin board...</p>
+            </div>
+          ) : error ? (
+            <div className="content-container">
+              <p className="error-message">{error}</p>
+            </div>
+          ) : (
+            <div className="content-container">
+              {categories.map((category) => {
+                const categoryPosts = postsWithImages.filter((post) => post.category === category.name);
+                if (categoryPosts.length === 0) return null;
 
-              return (
-                <section key={category.id} className="category-section">
-                  <h3>
-                    {getIcon(category.name)} {category.name}
-                  </h3>
-                  <div className={`category-grid category-${category.id}`}>
-                    {categoryPosts.length === 0 ? (
-                      <p className="no-posts-message">No posts in this category currently.</p>
-                    ) : (
-                      categoryPosts.map((post) => (
-                        <div key={post.id} className="post-box">
-                          {renderPostContent(post)}
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </section>
-              );
-            })}
-          </div>
-          
-        )}
-                </div>
+                return (
+                  <section key={category.id} className="category-section">
+                    <h3>
+                      {getIcon(category.name)} {category.name}
+                    </h3>
+                    <div className={`category-grid category-${category.id}`}>
+                      {categoryPosts.length === 0 ? (
+                        <p className="no-posts-message">No posts in this category currently.</p>
+                      ) : (
+                        categoryPosts.map((post) => (
+                          <div key={post.id} className="post-box">
+                            {renderPostContent(post)}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </section>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </main>
     </div>
   );
