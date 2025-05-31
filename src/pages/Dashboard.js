@@ -11,6 +11,20 @@ import Sidebar from "../components/sidebar";
 import { auth, db } from "../firebase";
 import "../styles/Dashboard.css";
 
+function DeletePopup({ title, onConfirm, onCancel }) {
+  return (
+    <div className="popup-overlay">
+      <div className="popup">
+        <h3>⚠️ Warning</h3>
+        <p>You are about to delete <strong>{title}</strong>?</p>
+        <div className="popup-buttons">
+          <button onClick={onCancel} className="cancel">Cancel</button>
+          <button onClick={onConfirm} className="confirm">Delete</button>
+        </div>
+      </div>
+    </div>
+  );
+}
 const { TextArea, Search } = Input;
 const { Option } = Select;
 
@@ -63,6 +77,9 @@ export default function Dashboard() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentMenuKey, setCurrentMenuKey] = useState("");
   const [editedPost, setEditedPost] = useState(null);
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [postToDelete, setPostToDelete] = useState(null);
+  
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -257,7 +274,7 @@ export default function Dashboard() {
     }
   };
 
-  const handleDeletePost = async (postId) => {
+const handleDeletePost = async (postId) => {
     try {
       await deleteDoc(doc(db, "posts", postId));
       const imageUrlsToDelete = imageUrls.filter((imageUrl) => imageUrl.postId === postId);
@@ -267,9 +284,31 @@ export default function Dashboard() {
       await Promise.all(deleteImageUrlPromises);
       message.success("Post and associated image URLs deleted successfully");
       setSelectedPost(null);
+      setShowDeletePopup(false); // Close popup after deletion
+      setPostToDelete(null); // Clear post to delete
     } catch (error) {
       message.error("Failed to delete post");
+      setShowDeletePopup(false); // Close popup on error
+      setPostToDelete(null); // Clear post to delete
     }
+  };
+
+
+  const handleDeleteClick = (post) => {
+    setPostToDelete(post);
+    setShowDeletePopup(true);
+  };
+
+
+  const confirmDelete = () => {
+    if (postToDelete) {
+      handleDeletePost(postToDelete.id);
+    }
+  };
+
+  const cancelDelete = () => {
+    setShowDeletePopup(false);
+    setPostToDelete(null);
   };
 
   const handleEditPost = (post) => {
@@ -302,7 +341,7 @@ export default function Dashboard() {
       <Menu.Item key="edit" onClick={() => handleEditPost(post)}>
         Edit
       </Menu.Item>
-      <Menu.Item key="delete" danger onClick={() => handleDeletePost(post.id)}>
+      <Menu.Item key="delete" danger onClick={() => handleDeleteClick(post)}>
         Delete
       </Menu.Item>
     </Menu>
@@ -368,7 +407,7 @@ export default function Dashboard() {
     setEditedPost(null);
   };
 
-  return (
+return (
     <div className="manage-container">
       <Sidebar
         activePage="Dashboard"
@@ -386,10 +425,10 @@ export default function Dashboard() {
           <h1>DASHBOARD</h1>
           {selectedPost ? (
             <div className="post">
-                <h2>👁️ Preview Post</h2>
-                <Dropdown overlay={() => menu(selectedPost)} trigger={["click"]}>
-                  <Button type="link" icon={<FaEllipsisV />} className="ant-dropdown-trigger" />
-                </Dropdown>
+              <h2>👁️ Preview Post</h2>
+              <Dropdown overlay={() => menu(selectedPost)} trigger={["click"]}>
+                <Button type="link" icon={<FaEllipsisV />} className="ant-dropdown-trigger" />
+              </Dropdown>
               <p>
                 You're currently viewing a published post. Use the three-dot menu to edit or delete this post.
               </p>
@@ -518,6 +557,14 @@ export default function Dashboard() {
               </Form>
             </div>
           )}
+          {/* Add DeletePopup rendering */}
+          {showDeletePopup && (
+            <DeletePopup
+              title={postToDelete?.title}
+              onConfirm={confirmDelete}
+              onCancel={cancelDelete}
+            />
+          )}
         </div>
       </main>
       <section className="post-section">
@@ -550,7 +597,7 @@ export default function Dashboard() {
                   {post.title}
                 </strong>
               </div>
-              <p>{post.content.substring(0, 40)}...</p>
+              <p>{post.content.substring(0, 40)}</p>
               {post.images && post.images.length > 0 && (
                 <div className="post-images">
                   {post.images.map((imageUrl, index) => (
