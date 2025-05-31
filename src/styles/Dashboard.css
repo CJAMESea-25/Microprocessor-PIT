@@ -81,7 +81,7 @@ body {
   font-size: 50px;
   font-family: "Inter", sans-serif;
   font-weight: 800;
-  padding-left: 2rem;
+  padding-left: 0.2rem;
   padding-right: 2rem;
   padding-top: 3rem;
   padding-bottom: 0.5rem;
@@ -92,7 +92,7 @@ body {
   font-family: "Inter", sans-serif;
   font-weight: bolder;
   padding-bottom: 20px;
-  padding-left: 48px;
+  padding-left: 7px;
 }
 
 .custom-select .ant-select-selector,
@@ -135,11 +135,16 @@ body {
   color: #888;
 }
 
+.form-item-spacing {
+  margin-left: 20px;
+}
+
 .form-item-spacing .label-text {
   font-weight: bold;
   color: #333;
   margin-bottom: 0.4rem;
   font-size: 1rem;
+  margin-left: 10px;
 }
 
 .ant-upload-list-picture-card-container {
@@ -475,7 +480,7 @@ body {
 .post p{
   font-size: 18px;
   padding-bottom: 20px;
-  padding-left: 48px;
+  padding-left: 7px;
 }
 /* Post Button Styling (ADD POST / UPDATE POST / GO BACK) */
 .post-button {
@@ -613,7 +618,7 @@ body {
 .post-title {
   cursor: pointer;
   color: #0066ff;
-    white-space: nowrap; /* Prevent text wrapping */
+  white-space: nowrap; /* Prevent text wrapping */
   overflow: hidden; /* Hide overflowing text */
   text-overflow: ellipsis; /* Add ellipsis for truncated text */
   max-width: 100%; /* Ensure text stays within container */
@@ -644,4 +649,58 @@ body {
     font-size: 16px;
     padding: 6px;
   }
+}
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.popup {
+  background: white;
+  border-top: 12px solid #0070ff;
+  padding: 2rem;
+  border-radius: 12px;
+  text-align: center;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.popup h3 {
+  color: #D2042D;
+  margin-bottom: 1rem;
+}
+
+.popup-buttons {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.popup-buttons .confirm {
+  background-color: #D2042D;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.popup-buttons .cancel {
+  background-color: #7f8c8d;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
 }
