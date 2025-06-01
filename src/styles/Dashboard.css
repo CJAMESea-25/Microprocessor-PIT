@@ -233,10 +233,10 @@ body {
 }
 
 .post-list li p{
-  white-space: nowrap; /* Prevent text wrapping */
-  overflow: hidden; /* Hide overflowing text */
-  text-overflow: ellipsis; /* Add ellipsis for truncated text */
-  max-width: 100%; /* Ensure text stays within container */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .emerg-button {
@@ -267,9 +267,8 @@ body {
   padding-left: 15px;
 }
 
-/* Emergency Button Styling */
 .emergency-btn {
-  background-color: #f7e139; /* Yellow background */
+  background-color: #f7e139;
   border-radius: 50%;
   border: none;
   color: #000000;
@@ -285,7 +284,7 @@ body {
 }
 
 .emergency-btn:hover {
-  background-color: #ff4d4f; /* Red on hover */
+  background-color: #ff4d4f;
   transform: scale(1.1);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
 }
@@ -482,23 +481,23 @@ body {
   padding-bottom: 20px;
   padding-left: 7px;
 }
-/* Post Button Styling (ADD POST / UPDATE POST / GO BACK) */
+
 .post-button {
   background-color: #0066ff;
   border: none;
   border-radius: 25px;
-  padding: 24px 44px; /* Adjusted padding for consistency */
+  padding: 24px 44px;
   font-size: 18px;
   font-weight: 700;
   color: black;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-  margin-right: 0; /* Remove margin-right to avoid extra spacing */
+  margin-right: 0;
 } 
 
 .post-button:hover {
-  background-color: #0052cc; /* Darker blue on hover */
+  background-color: #0052cc; 
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
 }
@@ -514,12 +513,11 @@ body {
   box-shadow: none;
 }
 
-/* Cancel Button Styling */
 .cancel-button1 {
   background-color: #dc1919;
   border: none;
   border-radius: 25px;
-  padding: 24px 44px; /* Adjusted padding for consistency */
+  padding: 24px 44px; 
   font-size: 18px;
   font-weight: 700;
   color: black;
@@ -558,7 +556,6 @@ body {
   outline-offset: 2px;
 }
 
-/* Dropdown Trigger Button Styling (Three-dot menu) */
 .ant-dropdown-trigger {
   position: absolute;
   top: 0;
@@ -574,7 +571,7 @@ body {
 }
 
 .ant-dropdown-trigger:hover {
-  background-color: #e6f0ff; /* Light blue on hover */
+  background-color: #e6f0ff;
   transform: scale(1.1);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
 }
@@ -607,21 +604,19 @@ body {
 }
 
 .post-list p{
-  white-space: nowrap; /* Prevent text wrapping */
-  overflow: hidden; /* Hide overflowing text */
-  text-overflow: ellipsis; /* Add ellipsis for truncated text */
-  max-width: 100%; /* Ensure text stays within container */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
-
-
 
 .post-title {
   cursor: pointer;
   color: #0066ff;
-  white-space: nowrap; /* Prevent text wrapping */
-  overflow: hidden; /* Hide overflowing text */
-  text-overflow: ellipsis; /* Add ellipsis for truncated text */
-  max-width: 100%; /* Ensure text stays within container */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .post-list-image {
@@ -631,7 +626,6 @@ body {
   margin-right: 5px;
 }
 
-/* Responsive adjustments for buttons */
 @media (max-width: 600px) {
   .post-button,
   .cancel-button1 {
@@ -673,11 +667,30 @@ body {
   width: 90%;
   max-width: 400px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
 }
 
 .popup h3 {
   color: #D2042D;
   margin-bottom: 1rem;
+  font-size: 1.2rem;
+  line-height: 1.4;
+}
+
+.popup p {
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 1.5rem;
+  word-wrap: break-word; 
+  overflow-wrap: break-word; 
+  hyphens: auto; 
+  max-height: 3.6em; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
 }
 
 .popup-buttons {
@@ -703,4 +716,22 @@ body {
   border: none;
   border-radius: 6px;
   cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  .popup {
+    padding: 1.5rem;
+    max-width: 300px;
+  }
+
+  .popup h3 {
+    font-size: 1rem;
+  }
+
+  .popup p {
+    font-size: 1rem;
+    max-height: 4.5em; 
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
 }

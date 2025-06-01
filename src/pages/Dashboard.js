@@ -25,6 +25,7 @@ function DeletePopup({ title, onConfirm, onCancel }) {
     </div>
   );
 }
+
 const { TextArea, Search } = Input;
 const { Option } = Select;
 
@@ -79,7 +80,6 @@ export default function Dashboard() {
   const [editedPost, setEditedPost] = useState(null);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [postToDelete, setPostToDelete] = useState(null);
-  
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -223,7 +223,6 @@ export default function Dashboard() {
         const postRef = doc(db, "posts", editedPost.id);
         await updateDoc(postRef, postData);
 
-        // Handle image updates
         const existingImages = imageUrls.filter((img) => img.postId === editedPost.id);
         const currentImageUrls = fileList.map((file) => file.url).filter(Boolean);
         const imagesToDelete = existingImages.filter((img) => !currentImageUrls.includes(img.url));
@@ -274,7 +273,7 @@ export default function Dashboard() {
     }
   };
 
-const handleDeletePost = async (postId) => {
+  const handleDeletePost = async (postId) => {
     try {
       await deleteDoc(doc(db, "posts", postId));
       const imageUrlsToDelete = imageUrls.filter((imageUrl) => imageUrl.postId === postId);
@@ -284,21 +283,19 @@ const handleDeletePost = async (postId) => {
       await Promise.all(deleteImageUrlPromises);
       message.success("Post and associated image URLs deleted successfully");
       setSelectedPost(null);
-      setShowDeletePopup(false); // Close popup after deletion
-      setPostToDelete(null); // Clear post to delete
+      setShowDeletePopup(false);
+      setPostToDelete(null);
     } catch (error) {
       message.error("Failed to delete post");
-      setShowDeletePopup(false); // Close popup on error
-      setPostToDelete(null); // Clear post to delete
+      setShowDeletePopup(false);
+      setPostToDelete(null);
     }
   };
-
 
   const handleDeleteClick = (post) => {
     setPostToDelete(post);
     setShowDeletePopup(true);
   };
-
 
   const confirmDelete = () => {
     if (postToDelete) {
@@ -348,7 +345,7 @@ const handleDeletePost = async (postId) => {
   );
 
   const filteredPosts = posts
-    .filter((post) => post?.type !== "emergency" && post?.title?.toLowerCase().includes(searchTerm.toLowerCase()))
+    .filter((post) => post?.title?.toLowerCase().includes(searchTerm.toLowerCase()))
     .map((post) => ({
       ...post,
       images: imageUrls.filter((img) => img.postId === post.id).map((img) => img.url),
@@ -407,7 +404,7 @@ const handleDeletePost = async (postId) => {
     setEditedPost(null);
   };
 
-return (
+  return (
     <div className="manage-container">
       <Sidebar
         activePage="Dashboard"
@@ -557,7 +554,6 @@ return (
               </Form>
             </div>
           )}
-          {/* Add DeletePopup rendering */}
           {showDeletePopup && (
             <DeletePopup
               title={postToDelete?.title}

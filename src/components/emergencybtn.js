@@ -1,6 +1,6 @@
 import { Button, Modal, message } from 'antd';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { useEffect, useState } from 'react';
+import { addDoc, collection } from 'firebase/firestore';
+import { useState } from 'react';
 import { db } from '../firebase';
 import '../styles/EmergencyBtn.css';
 
@@ -11,43 +11,131 @@ export default function EmergencyModal({
   setSelectedOption,
 }) {
   const [selectedLevel, setSelectedLevel] = useState(null);
-  const [messages, setMessages] = useState({
-    red: { title: '', content: '' },
-    yellow: { title: '', content: '' },
-    green: { title: '', content: '' },
-  });
 
-  useEffect(() => {
-    if (!selectedDisaster) return;
-
-    const fetchMessages = async () => {
-      try {
-        const redDoc = await getDoc(doc(db, 'emergencies', `${selectedDisaster}Red`));
-        const yellowDoc = await getDoc(doc(db, 'emergencies', `${selectedDisaster}Yellow`));
-        const greenDoc = await getDoc(doc(db, 'emergencies', `${selectedDisaster}Green`));
-
-        setMessages({
-          red: redDoc.exists() ? redDoc.data() : { title: '', content: '' },
-          yellow: yellowDoc.exists() ? yellowDoc.data() : { title: '', content: '' },
-          green: greenDoc.exists() ? greenDoc.data() : { title: '', content: '' },
-        });
-      } catch (error) {
-        message.error(`Failed to fetch messages from Firestore: ${error.message}`);
-      }
-    };
-
-    fetchMessages();
-  }, [selectedDisaster]);
-
-  useEffect(() => {
-    if (selectedLevel === 'red') {
-      message.warning(messages.red.content || '🚨 Red Warning: Immediate action required!');
-    } else if (selectedLevel === 'yellow') {
-      message.info(messages.yellow.content || '⚠️ Yellow Warning: Monitor the situation closely.');
-    } else if (selectedLevel === 'green') {
-      message.success(messages.green.content || '✅ Green Warning: Situation is under control.');
+  const mapDisasterToKeyFormat = (disaster) => {
+    switch (disaster) {
+      case 'rainfall':
+        return 'Rainfall';
+      case 'floodTyphoon':
+        return 'Flood/Typhoon';
+      case 'earthquake':
+        return 'Earthquake';
+      case 'volcanicEruption':
+        return 'VolcanicEruption';
+      case 'landslide':
+        return 'Landslide';
+      default:
+        return disaster;
     }
-  }, [selectedLevel, messages]);
+  };
+
+  const disasterMessages = {
+    RainfallRed: {
+      type: 'emergency',
+      category: 'Emergency Alerts',
+      level: 'red',
+      title: '🚨 Heavy Rain Red Warning',
+      content: 'Heavy rain starting! Move to safe shelters now. Stay away from flooded roads.',
+    },
+    RainfallYellow: {
+      type: 'emergency',
+      category: 'Emergency Alerts',
+      level: 'yellow',
+      title: '⚠️ Heavy Rain Yellow Warning',
+      content: 'Very heavy rain coming! Watch updates and prepare for floods.',
+    },
+    RainfallGreen: {
+      type: 'emergency',
+      category: 'Emergency Alerts',
+      level: 'green',
+      title: '✅ Heavy Rain Green Warning',
+      content: 'Rain slowing down. Resume normal activities',
+    },
+    'Flood/TyphoonRed': {
+      type: 'emergency',
+      category: 'Emergency Alerts',
+      level: 'red',
+      title: '🚨 Flood/Typhoon Red Warning',
+      content: 'Flood covering anytime. All residents should have been evacuated. Stay safe!',
+    },
+    'Flood/TyphoonYellow': {
+      type: 'emergency',
+      category: 'Emergency Alerts',
+      level: 'yellow',
+      title: '⚠️ Flood/Typhoon Yellow Warning',
+      content: 'Flood or typhoon risk growing. Watch updates and prepare to evacuate.',
+    },
+    'Flood/TyphoonGreen': {
+      type: 'emergency',
+      category: 'Emergency Alerts',
+      level: 'green',
+      title: '✅ Flood/Typhoon Green Warning',
+      content: 'Flood/typhoon has passed. It’s safe to resume normal activities but stay alert for updates.',
+    },
+    EarthquakeRed: {
+      type: 'emergency',
+      category: 'Emergency Alerts',
+      level: 'red',
+      title: '🚨 Earthquake Red Warning',
+      content: 'Earthquake happening! Drop, Cover, and Hold. Go to open areas when safe.',
+    },
+    EarthquakeYellow: {
+      type: 'emergency',
+      category: 'Emergency Alerts',
+      level: 'yellow',
+      title: '⚠️ Earthquake Yellow Warning',
+      content: 'Aftershocks may happen. Stay alert!',
+    },
+    EarthquakeGreen: {
+      type: 'emergency',
+      category: 'Emergency Alerts',
+      level: 'green',
+      title: '✅ Earthquake Green Warning',
+      content: 'No more aftershocks. Resume normal activities.',
+    },
+    VolcanicEruptionRed: {
+      type: 'emergency',
+      category: 'Emergency Alerts',
+      level: 'red',
+      title: '🚨 Volcanic Eruption Red Warning',
+      content: 'Volcano erupting soon! Leave danger areas now and follow evacuation routes.',
+    },
+    VolcanicEruptionYellow: {
+      type: 'emergency',
+      category: 'Emergency Alerts',
+      level: 'yellow',
+      title: '⚠️ Volcanic Eruption Yellow Warning',
+      content: 'Increased volcanic activity detected. A possible eruption may occur soon. Prepare for evacuation, avoid ashfall-prone areas, and stay updated through official alerts.',
+    },
+    VolcanicEruptionGreen: {
+      type: 'emergency',
+      category: 'Emergency Alerts',
+      level: 'green',
+      title: '✅ Volcanic Eruption Green Warning',
+      content: 'Volcano activity stopped. You can do normal activities now.',
+    },
+    LandslideRed: {
+      type: 'emergency',
+      category: 'Emergency Alerts',
+      level: 'red',
+      title: '🚨 Landslide Red Warning',
+      content: 'Landslide danger high! Leave hilly areas now and go to safe zones.',
+    },
+    LandslideYellow: {
+      type: 'emergency',
+      category: 'Emergency Alerts',
+      level: 'yellow',
+      title: '⚠️ Landslide Yellow Warning',
+      content: 'Ground movement observed. A possible landslide may occur. Monitor conditions closely, avoid elevated areas, and be ready to evacuate.',
+    },
+    LandslideGreen: {
+      type: 'emergency',
+      category: 'Emergency Alerts',
+      level: 'green',
+      title: '✅ Landslide Green Warning',
+      content: 'Landslide risk gone. You can do normal activities now.',
+    },
+  };
 
   const handleEmergencySelect = async (level) => {
     setSelectedLevel(level);
@@ -57,53 +145,58 @@ export default function EmergencyModal({
       message.error('No disaster selected. Please select a disaster first.');
       setSelectedLevel(null);
       setSelectedOption(null);
-      return; // Do not close modal yet to allow user to retry
+      return;
     }
 
     try {
-      // Deactivate all emergency messages
-      const disasterIds = ['rainfall', 'floodTyphoon', 'earthquake', 'volcanicEruption', 'landslide'];
-      const levels = ['Red', 'Yellow', 'Green'];
-      for (const disaster of disasterIds) {
-        for (const lvl of levels) {
-          const docRef = doc(db, 'emergencies', `${disaster}${lvl}`);
-          const docSnap = await getDoc(docRef);
-          if (docSnap.exists()) {
-            await updateDoc(docRef, { active: false });
-          }
-        }
+      const formattedDisaster = mapDisasterToKeyFormat(selectedDisaster);
+      const docId = `${formattedDisaster}${level.charAt(0).toUpperCase() + level.slice(1)}`;
+      const messageData = disasterMessages[docId];
+
+      if (!messageData) {
+        message.error(`Emergency post ${docId} does not exist.`);
+        setSelectedLevel(null);
+        setSelectedOption(null);
+        return;
       }
 
-      // Activate the selected message
-      const docId = `${selectedDisaster}${level.charAt(0).toUpperCase() + level.slice(1)}`;
-      const docRef = doc(db, 'emergencies', docId);
-      const docSnap = await getDoc(docRef);
-      if (!docSnap.exists()) {
-        message.error(`Emergency post ${docId} does not exist in Firestore.`);
-        return; // Do not close modal to allow user to retry
+      await addDoc(collection(db, 'posts'), {
+        type: messageData.type,
+        category: messageData.category,
+        title: messageData.title,
+        content: messageData.content,
+        timestamp: new Date().toISOString(),
+      });
+
+      if (level === 'red') {
+        message.warning(messageData.content || '🚨 Red Warning: Immediate action required!');
+      } else if (level === 'yellow') {
+        message.info(messageData.content || '⚠️ Yellow Warning: Monitor the situation closely.');
+      } else if (level === 'green') {
+        message.success(messageData.content || '✅ Green Warning: Situation is under control.');
       }
 
-      await updateDoc(docRef, {
-        active: true,      });
-
-      message.success(`Activated ${selectedDisaster} ${level} warning`);
+      message.success(`Emergency post "${formattedDisaster} ${level}" created`);
       setTimeout(() => {
-        setSelectedLevel(null); // Reset selection
-        onClose(); // Close modal after slight delay for feedback
-      }, 200); // 500ms delay to ensure success message is visible
+        setSelectedLevel(null);
+        onClose();
+      }, 200);
     } catch (error) {
-      message.error(`Failed to update Firestore: ${error.message}`);
+      message.error(`Failed to create emergency post: ${error.message}`);
+      setSelectedLevel(null);
+      setSelectedOption(null);
     }
   };
+
   const handleCancel = () => {
-    setSelectedLevel(null); // Reset selection
-    setSelectedOption(null); // Reset option in parent
-    onClose(); // Close modal
+    setSelectedLevel(null);
+    setSelectedOption(null);
+    onClose();
   };
 
   return (
     <Modal
-      title={`🚨 ${selectedDisaster ? selectedDisaster.charAt(0).toUpperCase() + selectedDisaster.slice(1) : 'Emergency'} Action Required`}
+      title={`${selectedDisaster ? mapDisasterToKeyFormat(selectedDisaster) : 'Emergency'} Action Required`} 
       open={visible}
       onCancel={handleCancel}
       className="emergency-modal"
@@ -124,16 +217,16 @@ export default function EmergencyModal({
           RED WARNING
         </Button>
         <Button
-          className={`emergency-option-button green-button ${selectedLevel === 'green' ? 'selected' : ''}`}
-          onClick={() => handleEmergencySelect('green')}
-        >
-          GREEN WARNING
-        </Button>
-        <Button
           className={`emergency-option-button yellow-button ${selectedLevel === 'yellow' ? 'selected' : ''}`}
           onClick={() => handleEmergencySelect('yellow')}
         >
           YELLOW WARNING
+        </Button>
+        <Button
+          className={`emergency-option-button green-button ${selectedLevel === 'green' ? 'selected' : ''}`}
+          onClick={() => handleEmergencySelect('green')}
+        >
+          GREEN WARNING
         </Button>
       </div>
     </Modal>

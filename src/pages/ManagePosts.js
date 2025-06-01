@@ -11,7 +11,7 @@ import Sidebar from '../components/sidebar';
 
 const getIcon = (cat) => {
   if (!cat) return '📌';
-  if (cat.includes('Emergency')) return '🚨';
+  if (cat.includes('Emergency Alerts')) return '🚨';
   if (cat.includes('School Events') || cat.includes('Community Events')) return '📅';
   if (cat.includes('Announcements')) return '📢';
   if (cat.includes('Lost and Found')) return '📝';
@@ -156,8 +156,7 @@ export default function ManagePosts() {
     .filter((post) => {
       const matchesSearch = searchTerm === '' || post.title?.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = selectedCategory === 'All' || post.category === selectedCategory;
-      const isNotEmergency = post?.type !== 'emergency';
-      return matchesSearch && matchesCategory && isNotEmergency;
+      return matchesSearch && matchesCategory;
     })
     .sort((a, b) => {
       const dateA = new Date(a.date.split(' / ').reverse().join('-'));

@@ -12,7 +12,7 @@ const ViewBulletin = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch categories from Firestore in real-time
+  // Fetch categories
   useEffect(() => {
     console.log("useEffect: Setting up Firestore listener for categories...");
     const unsubscribe = onSnapshot(collection(db, 'categories'), (snapshot) => {
@@ -48,7 +48,7 @@ const ViewBulletin = () => {
     };
   }, []);
 
-  // Fetch posts from Firestore in real-time
+  // Fetch posts
   useEffect(() => {
     console.log("useEffect: Setting up Firestore listener for posts...");
     const postsCollectionRef = collection(db, 'posts');
@@ -61,7 +61,7 @@ const ViewBulletin = () => {
       }));
       console.log('Fetched posts:', fetchedPosts);
       setPosts(fetchedPosts);
-      setLoading(false); // Set loading to false after posts are fetched
+      setLoading(false); 
     }, (error) => {
       console.error('Error fetching posts:', error.message, 'Code:', error.code);
       setError('Failed to load posts: ' + error.message);
@@ -74,7 +74,6 @@ const ViewBulletin = () => {
     };
   }, []);
 
-  // Fetch image URLs from Firestore in real-time
   useEffect(() => {
     console.log("useEffect: Setting up Firestore listener for imageUrls...");
     const imageUrlsCollectionRef = collection(db, 'imageUrls');
@@ -83,7 +82,8 @@ const ViewBulletin = () => {
     const unsubscribe = onSnapshot(imageUrlsCollectionRef, (snapshot) => {
       const fetchedImageUrls = snapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data(),
+        postId: doc.data().postId,
+        url: Array.isArray(doc.data().url) ? doc.data().url : [doc.data().url].filter(Boolean),
       }));
       console.log('Fetched imageUrls:', fetchedImageUrls);
       setImageUrls(fetchedImageUrls);
@@ -98,15 +98,13 @@ const ViewBulletin = () => {
     };
   }, []);
 
-  // Merge posts with their images
   const postsWithImages = posts.map((post) => ({
     ...post,
     images: imageUrls
-      .filter((imageUrl) => imageUrl.postId === post.id)
-      .map((img) => img.imageUrl),
+      .filter((image) => image.postId === post.id)
+      .flatMap((image) => image.url), 
   }));
 
-  // Function to get category-specific icons (imitating Dashboard.js)
   const getIcon = (cat) => {
     if (!cat) return '📌';
     if (cat.includes('Emergency Alerts')) return '🚨';
@@ -122,9 +120,8 @@ const ViewBulletin = () => {
         <h4>
           {getIcon(post.category)} {post.title || 'No Title'}
         </h4>
-       <p className="posted-date">
-  Posted on {post.timestamp ? (
-    <>
+        <p className="posted-date">Posted on {post.timestamp ? (
+      <>
       {new Date(post.timestamp).toLocaleString('en-US', {
         year: 'numeric',
         month: 'long',
@@ -136,13 +133,11 @@ const ViewBulletin = () => {
         minute: '2-digit',
         hour12: true
       })}
-    </>
-  ) : 'N/A'}
-</p>
+      </>
+       ) : 'N/A'} </p>
         <p className="post-main-content">
           {post.content || post.description || 'No content provided.'}
         </p>
-        {/* Display images if any, imitating Dashboard.js */}
         {post.images && post.images.length > 0 && (
           <div className="post-images">
             {post.images.map((imageUrl, index) => (
@@ -151,6 +146,7 @@ const ViewBulletin = () => {
                 src={imageUrl}
                 alt={`Post image ${index + 1}`}
                 className="post-image"
+                onError={(e) => console.error(`Failed to load image: ${imageUrl}`, e)}
               />
             ))}
           </div>
@@ -212,7 +208,7 @@ const ViewBulletin = () => {
 
   return (
     <div className="board-container">
-      {/* Fixed Header and Title */}
+
       <header className="fixed-header">
         <div className="logo-section">
           <div className="logo">
@@ -228,9 +224,7 @@ const ViewBulletin = () => {
           </h2>
         </div>
       </header>
-
       <div className="content-container">
-        {/* Dynamic sections for each category */}
         {categories.map((category) => {
           const categoryPosts = postsWithImages.filter((post) => post.category === category.name);
           if (categoryPosts.length === 0) return null;

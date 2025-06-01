@@ -14,7 +14,7 @@ const AdminViewBulletin = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch categories from Firestore in real-time
+  // Fetch categories
   useEffect(() => {
     console.log("useEffect: Setting up Firestore listener for categories...");
     const unsubscribe = onSnapshot(collection(db, 'categories'), (snapshot) => {
@@ -50,13 +50,13 @@ const AdminViewBulletin = () => {
     };
   }, []);
 
-  // Fetch posts from Firestore in real-time
+  // Fetch posts 
   useEffect(() => {
     console.log("useEffect: Setting up Firestore listener for posts...");
     const postsCollectionRef = collection(db, 'posts');
     const postsQuery = query(postsCollectionRef, orderBy('timestamp', 'desc'));
 
-    const unsubscribe = onSnapshot(postsCollectionRef, (snapshot) => {
+    const unsubscribe = onSnapshot(postsQuery, (snapshot) => { 
       const fetchedPosts = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -76,7 +76,7 @@ const AdminViewBulletin = () => {
     };
   }, []);
 
-  // Fetch image URLs from Firestore in real-time
+  // Fetch image 
   useEffect(() => {
     console.log("useEffect: Setting up Firestore listener for imageUrls...");
     const imageUrlsCollectionRef = collection(db, 'imageUrls');
@@ -91,7 +91,7 @@ const AdminViewBulletin = () => {
       setImageUrls(fetchedImageUrls);
     }, (error) => {
       console.error('Error fetching imageUrls:', error.message, 'Code:', error.code);
-      setError('Failed to load images: ' + error.message); // Fixed line
+      setError('Failed to load images: ' + error.message); 
     });
 
     return () => {
@@ -100,15 +100,15 @@ const AdminViewBulletin = () => {
     };
   }, []);
 
-    // Merge posts with their images
-    const postsWithImages = posts.map((post) => {
-      const postImages = imageUrls.filter((img) => img.postId === post.id).map((img) => img.url);
-      console.log(`Post ${post.id} images:`, postImages);
-      return {
-        ...post,
-        images: postImages,
-      };
-    });
+
+  const postsWithImages = posts.map((post) => {
+    const postImages = imageUrls.filter((img) => img.postId === post.id).map((img) => img.url);
+    console.log(`Post ${post.id} images:`, postImages);
+    return {
+      ...post,
+      images: postImages,
+    };
+  });
 
   const getIcon = (cat) => {
     if (!cat) return '📌';
@@ -147,10 +147,10 @@ const AdminViewBulletin = () => {
         </p>
         {post.images && post.images.length > 0 && (
           <div className="post-images">
-            {post.images.map((imageUrls, index) => (
+            {post.images.map((imageUrl, index) => (
               <img
                 key={index}
-                src={imageUrls}
+                src={imageUrl}
                 alt={`Post image ${index + 1}`}
                 className="post-image"
                 loading="lazy"

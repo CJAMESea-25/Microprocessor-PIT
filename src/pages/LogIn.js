@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import adminIllustration from '../assets/AdminLogIn.png';
 import logo from '../assets/BayadBoardLogo.png';
-import { auth } from '../firebase'; // adjust path to your firebase.js location
+import { auth } from '../firebase'; 
 import '../styles/LogIn.css';
 
 const LogIn = () => {
@@ -18,7 +18,7 @@ const LogIn = () => {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate('/Dashboard'); //butang diri dashboard na route
+      navigate('/Dashboard');
     } catch (err) {
       setError('Invalid email or password.');
     }

@@ -1,14 +1,12 @@
-/* Global Container */
 .board-container {
   background: white;
   color: black;
   max-width: 1200px;
   width: 100%;
   margin: auto;
-  min-height: 100vh; /* Ensure the container spans the viewport height */
+  min-height: 100vh;
 }
 
-/* Header */
 .header {
   display: block;
   margin-bottom: 1rem;
@@ -30,12 +28,10 @@ header .logo-section img {
   color: #0056ff;
   text-decoration: none;
   font-size: 1.5rem;
-  /*margin-top: 1.5rem; */
 }
 
-/* Title Bar */
 .title-bar {
-  max-width: 1200px; /* Match board-container width */
+  max-width: 1200px; 
   width: 100%;
   display: flex;
   align-items: center;
@@ -52,7 +48,6 @@ header .logo-section img {
   text-align: right;
 }
 
-/* Emergency Alert Box */
 .alerts-section {
   margin-top: 0;
   margin-bottom: 3rem;
@@ -92,7 +87,6 @@ header .logo-section img {
   text-align: center;
 }
 
-/* Announcements */
 .announcements-section {
   margin-top: 3rem;
 }
@@ -131,14 +125,12 @@ header .logo-section img {
   text-align: center;
 }
 
-/* Container for logo and back button */
 .logo-section {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
 }
 
-/* Logo styling */
 .logo {
   display: flex;
   align-items: center;
@@ -151,7 +143,6 @@ header .logo-section img {
   margin: 0;
 }
 
-/* Firebase add */
 .loading-message,
 .error-message,
 .no-posts-message {
@@ -162,11 +153,10 @@ header .logo-section img {
 }
 
 .error-message {
-  color: #d9534f; /* Red for errors */
+  color: #d9534f; 
   font-weight: bold;
 }
 
-/* Styles for dynamic post cards if you don't have them yet */
 .posted-date {
   font-size: 0.85em;
   color: #888;
@@ -187,8 +177,8 @@ header .logo-section img {
   line-height: 1.5;
   color: #555;
   margin-top: 20px;
-  word-break: break-word; /* Break long words to prevent overflow */
-  overflow-wrap: anywhere; /* Ensure text wraps within the container */
+  word-break: break-word; 
+  overflow-wrap: anywhere; 
 }
 
 .content-container {
@@ -199,7 +189,6 @@ header .logo-section img {
   padding-top: 2rem;
 }
 
-/* For the announcement-grid, ensure it's a grid */
 .announcement-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -229,7 +218,6 @@ header .logo-section img {
   padding-bottom: 0.5rem;
 }
 
-/* Category Grid */
 .category-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -237,7 +225,6 @@ header .logo-section img {
   padding: 10px 0;
 }
 
-/* Post Box (generic style for all category posts) */
 .post-box {
   background: #f9f9f9;
   border: 2px solid black;
@@ -278,7 +265,6 @@ header .logo-section img {
   border-radius: 4px;
 }
 
-/* Post Author */
 .post-author {
   display: block;
   text-align: right;

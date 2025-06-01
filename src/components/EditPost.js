@@ -19,7 +19,6 @@ export default function EditPost({ post, onClose, onSave }) {
   const [fileList, setFileList] = useState([]);
   const [imageUrls, setImageUrls] = useState([]);
 
-  // Fetch categories from Firestore in real-time
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'categories'), (snapshot) => {
       const fetchedCategories = snapshot.docs.map((doc) => ({
@@ -44,22 +43,20 @@ export default function EditPost({ post, onClose, onSave }) {
     return () => unsubscribe();
   }, []);
 
-  // Fetch existing image URLs from Firestore for this post
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'imageUrls'), (snapshot) => {
       const fetchedImageUrls = snapshot.docs
         .filter((doc) => doc.data().postId === post.id)
         .map((doc) => ({
           id: doc.id,
-          uid: doc.id, // For Upload component
-          name: `image-${doc.id}.png`, // Placeholder name
+          uid: doc.id, 
+          name: `image-${doc.id}.png`, 
           status: 'done',
-          url: doc.data().url, // Fixed: Use 'url' instead of 'imageUrl'
+          url: doc.data().url, 
         }));
 
       console.log('Fetched imageUrls for post:', fetchedImageUrls);
 
-      // Merge fetched images with locally added (but not yet saved) images
       setFileList((prevFileList) => {
         const localImages = prevFileList.filter((file) => !file.id);
         const updatedFileList = [
@@ -132,7 +129,6 @@ export default function EditPost({ post, onClose, onSave }) {
       await updateDoc(postRef, updatedPostData);
       console.log('Post updated successfully in Firestore:', editedPost.id);
 
-      // Handle new images
       const newImages = fileList.filter((file) => !file.id && file.originFileObj);
       if (newImages.length > 0) {
         const imageUrlPromises = newImages.map(async (file) => {
@@ -147,11 +143,9 @@ export default function EditPost({ post, onClose, onSave }) {
         await Promise.all(imageUrlPromises);
         console.log('New images saved to Firestore for post ID:', editedPost.id);
       }
-
-      // Call the parent's onSave with updated post data
       onSave({
         ...editedPost,
-        images: fileList.map((file) => file.url || file.preview), // Pass all images
+        images: fileList.map((file) => file.url || file.preview), 
       });
       message.success('Post updated successfully');
       onClose();
@@ -177,7 +171,6 @@ export default function EditPost({ post, onClose, onSave }) {
         <h2 className="preview-title">Edit Post</h2>
 
         <div className="preview-details">
-          {/* Category Dropdown */}
           <div>
             <div className="label-text">Category</div>
             <div className="field-box">
@@ -197,7 +190,6 @@ export default function EditPost({ post, onClose, onSave }) {
             </div>
           </div>
 
-          {/* Title Input */}
           <div>
             <div className="label-text">Title</div>
             <div className="field-box">
@@ -211,7 +203,6 @@ export default function EditPost({ post, onClose, onSave }) {
             </div>
           </div>
 
-          {/* Content Textarea */}
           <div>
             <div className="label-text">Content</div>
             <div className="field-box">
@@ -225,7 +216,6 @@ export default function EditPost({ post, onClose, onSave }) {
             </div>
           </div>
 
-          {/* Photo Upload */}
           <div>
             <div className="label-text">Photos</div>
             <Upload

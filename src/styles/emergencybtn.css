@@ -108,6 +108,15 @@
   font-weight: 600;
   transition: all 0.3s;
 }
+.emergency-content-preview {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  font-size: 14px;
+  color: #333;
+  margin-top: 16px;
+}
 
 .emergency-cancel-button:hover {
   background-color: #fff1f0;

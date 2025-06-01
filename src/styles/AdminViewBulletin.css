@@ -1,5 +1,3 @@
-/* AdminViewBulletin.css */
-
 body {
   margin: 0;
   background-color: #f8f9fa;
@@ -27,6 +25,7 @@ body {
 
 .container h1 {
   color: black;
+  margin-bottom: 20px;
 }
 
 .content-container {
@@ -36,10 +35,9 @@ body {
   height: 100%;
   margin-top: -20px;
   overflow-y: auto;
-  overflow-x: hidden; /* Prevent horizontal overflow */
+  overflow-x: hidden; 
 }
 
-/* Add post-box styling */
 .post-box {
   background: #f9f9f9;
   border: 2px solid black;
@@ -47,21 +45,19 @@ body {
   border-radius: 12px;
   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.05);
   text-align: justify;
-  overflow-x: hidden; /* Prevent horizontal overflow */
-  word-wrap: break-word; /* Break long words */
+  overflow-x: hidden;
+  word-wrap: break-word; 
 }
 
-/* Add post-main-content styling */
 .post-main-content {
   font-size: 0.9em;
   line-height: 1.5;
   color: #555;
   margin-top: 20px;
-  word-break: break-word; /* Break long words */
-  overflow-wrap: anywhere; /* Ensure text wraps properly */
+  word-break: break-word; 
+  overflow-wrap: anywhere; 
 }
 
-/* Add post-images styling */
 .post-images {
   max-width: 100%;
   display: flex;
@@ -71,16 +67,14 @@ body {
   margin-bottom: 10px;
 }
 
-/* Add post-image styling */
 .post-image {
   max-width: 100%;
-  width: 100%; /* Ensure image takes full available width */
+  width: 100%; 
   height: auto;
-  object-fit: contain; /* Use contain to avoid cropping */
+  object-fit: contain; 
   border-radius: 4px;
 }
 
-/* Add category-grid styling */
 .category-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -88,7 +82,6 @@ body {
   padding: 10px 0;
 }
 
-/* Category Section */
 .category-section {
   margin-top: 0;
   margin-bottom: 3rem;
@@ -104,7 +97,6 @@ body {
   padding-bottom: 0.5rem;
 }
 
-/* Post Author */
 .post-author {
   display: block;
   text-align: right;
@@ -113,7 +105,6 @@ body {
   margin-top: 10px;
 }
 
-/* Loading and Error Messages */
 .loading-message,
 .error-message,
 .no-posts-message {
@@ -124,6 +115,6 @@ body {
 }
 
 .error-message {
-  color: #d9534f; /* Red for errors */
+  color: #d9534f; 
   font-weight: bold;
 }
