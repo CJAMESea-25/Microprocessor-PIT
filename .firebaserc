@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "microprocessor-pit-914bc"
-  }
+    "default": "micropit2",
+    "micro": "micropit2"
+  },
+  "targets": {},
+  "etags": {}
 }
