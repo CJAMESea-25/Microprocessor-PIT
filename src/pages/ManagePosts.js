@@ -12,10 +12,9 @@ import Sidebar from '../components/sidebar';
 const getIcon = (cat) => {
   if (!cat) return '📌';
   if (cat.includes('Emergency Alerts')) return '🔴';
-  if (cat.includes('School Events') || cat.includes('Community Events')) return '📅';
-  if (cat.includes('Announcements')) return '📢';
-  if (cat.includes('Lost and Found')) return '📝';
-  if (cat.includes('Community News')) return '📰';
+  if (cat.includes('General Announcements')) return '📅';
+  if (cat.includes('Community Events')) return '📢';
+  if (cat.includes('Reminders or Notices')) return '📝';
   return '📌';
 };
 
@@ -235,7 +234,7 @@ export default function ManagePosts() {
                 >
                   <td>
                     {post.icon} {post.title}
-                  </td>
+                  </td> 
                   <td>{post.category}</td>
                   <td>{post.date}</td>
                   <td onClick={(e) => e.stopPropagation()}>
