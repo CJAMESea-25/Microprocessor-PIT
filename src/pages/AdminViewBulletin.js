@@ -112,7 +112,7 @@ const AdminViewBulletin = () => {
 
   const getIcon = (cat) => {
     if (!cat) return '📌';
-    if (cat.includes('Emergency Alerts')) return '🚨';
+    if (cat.includes('Emergency Alerts')) return '🔴';
     if (cat.includes('General Announcements')) return '📢';
     if (cat.includes('Community News')) return '📰';
     if (cat.includes('Reminders or Notices')) return '📝';

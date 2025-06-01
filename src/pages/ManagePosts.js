@@ -11,7 +11,7 @@ import Sidebar from '../components/sidebar';
 
 const getIcon = (cat) => {
   if (!cat) return '📌';
-  if (cat.includes('Emergency Alerts')) return '🚨';
+  if (cat.includes('Emergency Alerts')) return '🔴';
   if (cat.includes('School Events') || cat.includes('Community Events')) return '📅';
   if (cat.includes('Announcements')) return '📢';
   if (cat.includes('Lost and Found')) return '📝';
