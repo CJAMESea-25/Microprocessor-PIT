@@ -16,6 +16,11 @@
   margin-bottom: 2rem;
 }
 
+.sidebar-header nav ul li{
+  gap: 10px;
+  column-gap: 100px;
+}
+
 .sidebar-logo {
   width: 40px;
   height: auto;

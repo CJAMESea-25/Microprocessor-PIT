@@ -564,12 +564,6 @@ export default function Dashboard() {
         </div>
       </main>
       <section className="post-section">
-        <div className="emerg-button">
-          <h1>EMERGENCY</h1>
-          <button className="emergency-btn" onClick={showDisasterModal} type="button">
-            <FaBell />
-          </button>
-        </div>
         <h2>All Posts</h2>
         <p>Click on a post title below to view or edit its full content.</p>
         <Space direction="vertical" style={{ width: "100%" }}>
@@ -609,6 +603,12 @@ export default function Dashboard() {
             </li>
           ))}
         </ul>
+        <div className="emerg-button">
+          <h1>EMERGENCY</h1>
+          <button className="emergency-btn" onClick={showDisasterModal} type="button">
+            <FaBell />
+          </button>
+        </div>
         <DisasterModal
           visible={isDisasterModalVisible}
           onClose={handleDisasterModalClose}
